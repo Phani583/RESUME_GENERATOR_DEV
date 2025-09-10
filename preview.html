@@ -285,6 +285,21 @@
           `<p>${safe(data.additionalInfo)}</p>`
         );
       }
+      // ===== Declaration (NEW) =====
+      if (Array.isArray(data.declarations) && data.declarations.length) {
+        const html = `<ul>${data.declarations
+        .map(
+        (d) => `
+        <li>
+          <input type="checkbox" ${d.checked ? "checked" : ""} disabled>
+          <span>${safe(d.text || "")}</span>
+        </li>
+        `
+      )
+      .join("")}</ul>`;
+      addSection("Declaration", html);
+    }
+
 
       // TXT download
       function downloadTxt() {

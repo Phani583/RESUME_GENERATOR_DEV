@@ -47,6 +47,9 @@
     internshipsList: qs("#internshipsList"),
     hobbiesList: qs("#hobbiesList"),
     additionalInfo: qs("#additionalInfo"),
+    declarationList: qs("#declarationList"),
+    addDeclaration: qs("#addDeclaration"),
+
 
     // addHobby: qs("#addHobby"),
 
@@ -91,6 +94,8 @@
       internships: [],
       hobbies: [],
       additionalInfo: "", // ✅ new field
+      declarations: [], // ✅ new field
+
     };
   }
 
@@ -120,6 +125,8 @@
     renderCertifications();
     renderInternships();
     renderHobbies();
+    renderDeclarations();
+
   }
 
   // ===== Storage =====
@@ -713,6 +720,52 @@
     renderHobbies();
     saveToStorage();
   });
+
+    // ===== Declaration =====
+  els.addDeclaration.addEventListener("click", () => {
+    data.declarations.push({
+      text: "I hereby declare that the information provided is true and correct to the best of my knowledge and belief.",
+    });
+    renderDeclarations();
+    saveToStorage();
+  });
+
+
+function renderDeclarations() {
+  els.declarationList.innerHTML = "";
+  const list = Array.isArray(data.declarations)
+    ? data.declarations
+    : (data.declarations = []);
+  list.forEach((dec, i) => {
+    const div = document.createElement("div");
+    div.className = "list-item";
+    div.innerHTML = `
+      <div class="list-item-header">
+        <span class="list-item-title">Declaration ${i + 1}</span>
+        <button class="btn btn-small btn-danger" data-remove="${i}">Remove</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" data-k="checked" data-i="${i}" ${
+      dec.checked ? "checked" : ""
+    }>
+        <span>${escapeHtml(dec.text || "")}</span>
+      </label>
+    `;
+
+    // Remove button
+    div.querySelector("[data-remove]").addEventListener("click", () => {
+      data.declarations.splice(i, 1);
+      renderDeclarations();
+      saveToStorage();
+    });
+
+    // Attach checkbox handler
+    attachChangeHandlers(div, data.declarations, i);
+
+    els.declarationList.appendChild(div);
+  });
+}
+
 
   function renderHobbies() {
     els.hobbiesList.innerHTML = "";
