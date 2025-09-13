@@ -104,6 +104,16 @@
             }[c])
         );
       }
+      function ensureUrl(url) {
+  if (!url) return "";
+  url = String(url).trim();
+  // if already starts with http:// or https:// keep as is
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(url)) return url;
+  // otherwise add https://
+  return "https://" + url;
+}
+
+
       function addSection(title, html) {
         if (html && html.trim()) {
           // ensure wrapper exists
@@ -120,30 +130,40 @@
       // Header
       const pi = data.personalInfo || {};
       const pl = data.publicLinks || {};
-      let contacts = [
-        pi.email,
-        pi.phone,
-        pl.github,
-        pl.linkedin,
-        pl.portfolio,
-        pl.website,
-      ]
-        .filter(Boolean)
-        .map(safe)
-        .join(" | ");
-      // Add custom website links
-      if (Array.isArray(pl.custom)) {
-        pl.custom
-          .map((c) => c.url)
-          .filter(Boolean)
-          .forEach((url) => {
-            if (contacts.length) {
-              contacts += " | " + safe(url);
-            } else {
-              contacts = safe(url);
-            }
-          });
-      }
+    
+       // Build contacts with clickable links
+const contactParts = [];
+
+// email → mailto
+if (pi.email) {
+  contactParts.push(`<a href="mailto:${encodeURIComponent(pi.email)}">${safe(pi.email)}</a>`);
+}
+
+// phone as plain text
+if (pi.phone) contactParts.push(safe(pi.phone));
+
+// public links
+["github","linkedin","portfolio","website"].forEach((k) => {
+  const v = (pl && pl[k]) || "";
+  if (v && v.trim()) {
+    const href = ensureUrl(v);
+    contactParts.push(`<a href="${safe(href)}" target="_blank">${safe(v)}</a>`);
+  }
+});
+
+// custom links
+if (Array.isArray(pl.custom)) {
+  pl.custom.forEach((c) => {
+    const url = (c && c.url) ? c.url.trim() : "";
+    if (url) {
+      const href = ensureUrl(url);
+      contactParts.push(`<a href="${safe(href)}" target="_blank">${safe(url)}</a>`);
+    }
+  });
+}
+
+let contacts = contactParts.join(" | ");
+
 
       resume.innerHTML += `
   <div class="resume-header" style="display:flex;justify-content:space-between;align-items:center;">
@@ -236,10 +256,10 @@
         </p>
         ${
           p.projectUrl
-            ? `<p><a href="${safe(p.projectUrl)}" target="_blank">${safe(
-                p.projectUrl
-              )}</a></p>`
-            : ""
+          
+          ? `<p><a href="${safe(ensureUrl(p.projectUrl))}" target="_blank">${safe(p.projectUrl)}</a></p>`
+          : ""
+
         }
         ${
           p.description
@@ -265,11 +285,10 @@
               c.issuer || ""
             )} (${safe(c.date || "")})</p>
             ${
-              c.url
-                ? `<p><a href="${safe(c.url)}" target="_blank">${safe(
-                    c.url
-                  )}</a></p>`
-                : ""
+             c.url
+             ? `<p><a href="${safe(ensureUrl(c.url))}" target="_blank">${safe(c.url)}</a></p>`
+             : ""
+
             }
         ${c.description ? `<p>${safe(c.description)}</p>` : ""}
       `
