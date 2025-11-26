@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Preview — Image Sidebar (print-matched, robust html2pdf)</title>
+    <style>
+      :root {
+        --header-bg: #303645;
+        --sidebar-bg: #e9e9eb;
+        --accent: #2b33440;
+        --muted: #6f7478;
+        --line: #d9dfe3;
+        --white: #ffffff;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: #f4f6f8;
+        font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
+        color: #222;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 28px auto;
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      .controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .controls button {
+        background: var(--header-bg);
+        color: #fff;
+        border: 0;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .resume {
+        background: var(--white);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(10, 20, 30, 0.06);
+        position: relative;
+      }
+      .resume-header {
+        background: var(--header-bg);
+        padding: 38px 24px 56px;
+        text-align: center;
+        color: var(--white);
+      }
+      .resume-header .name {
+        font-size: 46px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        margin: 0;
+        text-transform: uppercase;
+      }
+      .resume-header .subtitle {
+        margin-top: 10px;
+        font-size: 15px;
+        opacity: 0.95;
+        font-weight: 400;
+      }
+      .resume-body {
+        display: flex;
+        min-height: 840px;
+        box-sizing: border-box;
+      }
+
+      /* <-- DECREASED LEFT COLUMN WIDTH (was 280px) AND TIGHTENED PADDING */
+      .left-col {
+        width: 230px; /* changed from 280px -> 250px */
+        background: var(--sidebar-bg);
+        padding: 78px 18px 36px 24px; /* slightly reduced padding */
+        border-right: 1px solid var(--line);
+        box-sizing: border-box;
+        position: relative;
+      }
+
+      .avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 8px solid var(--white);
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        position: absolute;
+        left: 20px; /* moved slightly left to match reduced column */
+        top: -75px;
+        background: var(--white);
+      }
+      .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .left-col h1 {
+        font-size: 18px;
+        margin: 12px 0 4px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .left-col .role-small {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+      .section-title {
+        margin-top: 22px;
+        margin-bottom: 8px;
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: 0.06em;
+        font-size: 15px;
+      }
+      .contact-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .contact-list li {
+        padding: 12px 0;
+        border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
+        font-size: 14px;
+        color: #2e3336;
+      }
+      .contact-list li strong {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--accent);
+        font-size: 13px;
+      }
+      .skills-list {
+        padding-left: 18px;
+        margin-top: 6px;
+      }
+      .skills-list li {
+        margin-bottom: 8px;
+        color: #333;
+      }
+
+      /* <-- RIGHT COLUMN: reduced left/right padding so it visually stretches more -->
+         Flex already makes it fill remaining space; reducing the padding gives more usable width. */
+      .right-col {
+        flex: 1;
+        padding: 15px 20px; /* reduced horizontal padding from 56px -> 40px */
+        background: var(--white);
+        box-sizing: border-box;
+      }
+
+      .block {
+        margin-bottom: 28px;
+      }
+      .block h2 {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 12px;
+        font-size: 18px;
+        color: var(--accent);
+        font-weight: 800;
+      }
+      .profile-text {
+        color: #333;
+        line-height: 1.7;
+      }
+
+      .tl-item {
+        position: relative;
+        padding: 10px 0 14px;
+      }
+      .timeline {
+        position: relative;
+        padding-left: 0; /* remove extra left padding now that line is gone */
+        margin-left: 0;
+      }
+      /* hide the vertical line */
+      .timeline::before {
+        display: none;
+      }
+      /* hide the round marker */
+      .tl-item::before {
+        display: none;
+      }
+
+      .tl-title {
+        font-weight: 700;
+        margin: 0 0 6px;
+        font-size: 16px;
+      }
+      .tl-meta {
+        float: right;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .tl-company {
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .tl-desc {
+        color: #333;
+        line-height: 1.6;
+      }
+      .edu-item {
+        margin-bottom: 12px;
+      }
+      .edu-item .meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .edu-date {
+        float: right;
+        color: var(--muted);
+        font-weight: 700; /* matches .tl-meta from experience */
+        font-size: 16px; /* same thickness / size as experience */
+        letter-spacing: 0.3px;
+      }
+      .edu-item {
+        margin-bottom: 18px; /* better spacing like experience */
+      }
+
+      @media (max-width: 900px) {
+        .resume-header .name {
+          font-size: 28px;
+        }
+        .left-col {
+          width: 100%;
+          padding: 24px;
+          order: 0;
+        }
+        .avatar {
+          position: relative;
+          left: calc(50% - 75px);
+          top: -65px;
+          margin-bottom: 8px;
+        }
+        .resume-body {
+          flex-direction: column;
+        }
+        .right-col {
+          padding: 20px;
+        }
+      }
+      .tl-item,
+      .timeline,
+      .edu-item,
+      .block {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        -webkit-column-break-inside: avoid;
+        -moz-column-break-inside: avoid;
+      }
+      /* ------------------ Print / PDF fixes (append this) ------------------ */
+      /* ------------------ Print / PDF fixes (stronger) ------------------ */
+      /* --- Minimal print rules: do NOT alter layout; keep preview appearance --- */
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      @media print {
+        /* keep colors visible but don't change layout */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+
+        /* hide UI buttons in print */
+        .controls,
+        #pdfBtn,
+        #txtBtn {
+          display: none !important;
+        }
+
+        /* keep page-break rules but don't force widths/positions */
+        .tl-item,
+        .timeline,
+        .edu-item,
+        .block {
+          break-inside: avoid !important;
+          page-break-inside: avoid !important;
+        }
+
+        /* make sure resume element is visible for screen-capture style rendering */
+        .resume {
+          background-clip: padding-box !important;
+          overflow: visible !important;
+        }
+      }
+
+      /* ====== Added/Enhanced styles for Preview4 (paste at end of your CSS) ====== */
+
+      /* small utility */
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      /* Pills used for links and small metadata */
+      .pill {
+        display: inline-block;
+        margin: 6px 6px 6px 0;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(43, 51, 68, 0.06);
+        font-size: 13px;
+        color: var(--accent);
+        text-decoration: none;
+        line-height: 1;
+      }
+      .pill a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .pill:hover {
+        background: rgba(43, 51, 68, 0.1);
+      }
+
+      /* Generic list item used for projects/certs/skills */
+      .list-item {
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
+      }
+      .list-item-title {
+        font-weight: 700;
+        margin: 0 0 6px;
+        font-size: 15px;
+        color: var(--accent);
+      }
+      .list-item .muted {
+        display: block;
+        margin-top: 4px;
+      }
+
+      /* Skills list: show category when present and lightly emphasise level */
+      .skills-list {
+        list-style: none;
+        padding: 0 0 0 12px;
+        margin: 6px 0;
+      }
+      .skills-list li {
+        margin: 6px 0;
+        font-size: 14px;
+        color: #2e3336;
+      }
+      .skills-list li strong {
+        display: inline-block;
+        margin-right: 8px;
+        color: var(--accent);
+        font-weight: 800;
+        font-size: 13px;
+      }
+
+      /* Timeline / experience / project small tweaks */
+      .tl-item {
+        padding: 10px 0;
+      }
+      .tl-title {
+        font-weight: 700;
+        font-size: 16px;
+        margin: 0 0 6px;
+      }
+      .tl-meta {
+        float: right;
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .tl-company {
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .tl-desc {
+        color: #333;
+        line-height: 1.6;
+      }
+
+      /* Education scoring row (CGPA / Marks / Grade) */
+      .edu-item .muted {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .edu-item .score-pill {
+        display: inline-block;
+        margin-top: 6px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        background: rgba(43, 51, 68, 0.04);
+        font-size: 13px;
+        color: var(--accent);
+      }
+
+      /* Contact list rows (make links clickable but compact) */
+      .contact-list a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .contact-list a:hover {
+        text-decoration: underline;
+      }
+
+      /* Projects / Certifications / Internships wrappers */
+      .right-col .block .tl-item + .tl-item {
+        margin-top: 8px;
+      }
+
+      /* Achievements rendered as bullets (re-use skills-list styles) */
+      .block ul.skills-list {
+        margin: 6px 0 0 12px;
+      }
+
+      /* Additional & declaration text */
+      .right-col .block div {
+        color: #333;
+        line-height: 1.6;
+      }
+      .right-col .block h2 {
+        margin-bottom: 8px;
+      }
+
+      /* Responsive & print-safe adjustments (complementing existing rules) */
+      @media (max-width: 900px) {
+        .pill {
+          margin: 6px 4px 6px 0;
+          padding: 5px 8px;
+          font-size: 12px;
+        }
+        .left-col {
+          padding: 18px;
+        }
+        .avatar {
+          left: calc(50% - 75px);
+          top: -65px;
+        }
+      }
+
+      /* print refinements: ensure thin separators remain subtle on paper */
+      @media print {
+        .pill {
+          background: transparent;
+          border: 1px solid #eee;
+          color: #111;
+        }
+        .contact-list li {
+          border-bottom: 1px dashed #eee;
+        }
+        .list-item {
+          border-bottom: 1px dashed #eee;
+          page-break-inside: avoid;
+        }
+      }
+
+      /* Enable bullet points for Skills, Languages, Hobbies */
+      .left-col .skills-list {
+        list-style: disc !important; /* show normal round bullets */
+        padding-left: 20px !important; /* spacing for bullets */
+        margin-top: 6px;
+      }
+
+      .left-col .skills-list li {
+        margin-bottom: 6px;
+      }
+
+      /* Fix long contact links overflowing */
+      .contact-list li div,
+      .contact-list li div a {
+        display: block;
+        max-width: 100%;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        line-height: 1.4;
+      }
+
+      /* Desktop preview unchanged — this only affects printing output */
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <div class="controls">
+        <button id="pdfBtn">Download PDF (exact)</button>
+        <button id="txtBtn">Download TXT</button>
+      </div>
+
+      <div id="resumeRoot" class="resume" aria-live="polite"></div>
+    </div>
+
+    <!-- script will load html2pdf dynamically if needed -->
+    <script>
+      // ---------------- CONFIG ----------------
+      const DEFAULT_PHOTO =
+        "/mnt/data/6e80851d-4cca-4dc0-bf0c-7ac1293103ca.png"; // <-- use your uploaded path
+      const LOCAL_STORAGE_KEY = "resumeData"; // your data key
+
+      // ---------------- helpers ----------------
+      function log(...args) {
+        console.log("[resume-pdf]", ...args);
+      }
+      function safe(s = "") {
+        return String(s || "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;",
+            }[c])
+        );
+      }
+      function normalizeUrl(u) {
+        if (!u) return "";
+        u = String(u).trim();
+        if (
+          u.startsWith("/") ||
+          u.startsWith("http://") ||
+          u.startsWith("https://") ||
+          u.startsWith("data:") ||
+          u.startsWith("blob:")
+        )
+          return u;
+        return "https://" + u;
+      }
+
+      // try to convert image URL to dataURL (base64) to avoid CORS/tainted canvas
+      async function imageUrlToDataUrl(url) {
+        try {
+          if (!url) return "";
+          if (url.startsWith("data:")) return url;
+          const resp = await fetch(url, { mode: "cors" });
+          if (!resp.ok) throw new Error("image fetch failed: " + resp.status);
+          const blob = await resp.blob();
+          return await new Promise((res, rej) => {
+            const reader = new FileReader();
+            reader.onload = () => res(reader.result);
+            reader.onerror = () => rej(new Error("FileReader failed"));
+            reader.readAsDataURL(blob);
+          });
+        } catch (err) {
+          log("imageUrlToDataUrl failed for", url, err);
+          return url;
+        }
+      }
+
+      function ensureHtml2Pdf() {
+        // Loads html2canvas, jspdf and html2pdf.bundle in sequence and resolves when available on window.
+        return new Promise((resolve, reject) => {
+          // already loaded?
+          if (
+            window.html2pdf &&
+            (window.html2canvas || window.html2pdf.html2canvas) &&
+            (window.jspdf ||
+              window.jsPDF ||
+              (window.html2pdf && window.html2pdf.jsPDF))
+          ) {
+            // normalize references
+            if (
+              !window.html2canvas &&
+              window.html2pdf &&
+              window.html2pdf.html2canvas
+            ) {
+              window.html2canvas = window.html2pdf.html2canvas;
+            }
+            if (!window.jsPDF && window.jspdf && window.jspdf.jsPDF) {
+              window.jsPDF = window.jspdf.jsPDF;
+            }
+            if (!window.jsPDF && window.html2pdf && window.html2pdf.jsPDF) {
+              window.jsPDF = window.html2pdf.jsPDF;
+            }
+            return resolve(window.html2pdf);
+          }
+
+          // helper to inject script and wait
+          function loadScript(src, globalCheckFn) {
+            return new Promise((res, rej) => {
+              // if already present, resolve
+              try {
+                if (globalCheckFn && globalCheckFn()) return res();
+              } catch (e) {
+                /* ignore */
+              }
+
+              const s = document.createElement("script");
+              s.src = src;
+              s.async = true;
+              s.onload = () => {
+                // small delay to let UMD attach to window
+                setTimeout(() => {
+                  if (globalCheckFn && !globalCheckFn()) {
+                    // even though loaded, the expected global didn't attach
+                    console.warn(
+                      "script loaded but global check failed for",
+                      src
+                    );
+                  }
+                  res();
+                }, 30);
+              };
+              s.onerror = () => rej(new Error("Failed to load " + src));
+              document.head.appendChild(s);
+            });
+          }
+
+          (async () => {
+            try {
+              // 1) html2canvas (explicit)
+              if (!window.html2canvas) {
+                await loadScript(
+                  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+                  () => !!window.html2canvas
+                );
+              }
+
+              // 2) jsPDF (UMD build)
+              if (
+                !window.jsPDF &&
+                !(window.jspdf && window.jspdf.jsPDF) &&
+                !window.jsPDF
+              ) {
+                await loadScript(
+                  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+                  () => !!(window.jspdf && window.jspdf.jsPDF) || !!window.jsPDF
+                );
+                // Normalise export (UMD attaches window.jspdf)
+                if (window.jspdf && window.jspdf.jsPDF && !window.jsPDF) {
+                  window.jsPDF = window.jspdf.jsPDF;
+                  // also set legacy alias
+                  window.jspdf = window.jspdf;
+                  window.jsPDF = window.jspdf.jsPDF;
+                }
+                if (
+                  !window.jsPDF &&
+                  window.jsPDF === undefined &&
+                  window.jspdf &&
+                  window.jspdf.jsPDF
+                ) {
+                  window.jsPDF = window.jspdf.jsPDF;
+                }
+              }
+
+              // 3) html2pdf bundle (last)
+              if (!window.html2pdf) {
+                await loadScript(
+                  "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js",
+                  () => !!window.html2pdf
+                );
+              }
+
+              // Post-load normalization: make sure html2canvas and jsPDF are reachable at expected names
+              if (
+                !window.html2canvas &&
+                window.html2pdf &&
+                window.html2pdf.html2canvas
+              ) {
+                window.html2canvas = window.html2pdf.html2canvas;
+              }
+              if (!window.jsPDF) {
+                if (window.jspdf && window.jspdf.jsPDF)
+                  window.jsPDF = window.jspdf.jsPDF;
+                if (window.html2pdf && window.html2pdf.jsPDF)
+                  window.jsPDF = window.html2pdf.jsPDF;
+              }
+
+              // Final check
+              if (!window.html2pdf)
+                return reject(new Error("html2pdf failed to load"));
+              if (!window.html2canvas && !window.html2pdf.html2canvas) {
+                console.warn(
+                  "html2canvas not found on window after load; trying to continue."
+                );
+              }
+              // resolve with window.html2pdf (most handlers expect that)
+              resolve(window.html2pdf);
+            } catch (err) {
+              reject(err);
+            }
+          })();
+        });
+      }
+
+      // ---------------- render resume preview ----------------
+      // ---------------- render resume preview (Preview4) ----------------
+      (function renderPreview() {
+        // read saved data exactly as your main script writes it
+        const data = JSON.parse(localStorage.getItem("resumeData") || "{}");
+        const pi = data.personalInfo || {};
+        const pl = data.publicLinks || {}; // object: { github, linkedin, portfolio, website, custom: [] }
+
+        // pick photo (support base64 or URL)
+        const DEFAULT_PHOTO =
+          "/mnt/data/6e80851d-4cca-4dc0-bf0c-7ac1293103ca.png";
+        const photo =
+          pi.profilePhoto && pi.profilePhoto.trim()
+            ? pi.profilePhoto
+            : DEFAULT_PHOTO;
+
+        // small helpers
+        function safe(s = "") {
+          return String(s || "").replace(
+            /[&<>"']/g,
+            (c) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;",
+              }[c])
+          );
+        }
+        function normalizeUrl(u) {
+          if (!u) return "";
+          u = String(u).trim();
+          if (
+            u.startsWith("/") ||
+            u.startsWith("http://") ||
+            u.startsWith("https://") ||
+            u.startsWith("data:") ||
+            u.startsWith("blob:")
+          )
+            return u;
+          return "https://" + u;
+        }
+        function emptyNodeHtml(msg = "") {
+          return `<div style="color:var(--muted)">${msg || "—"}</div>`;
+        }
+
+        // Build contact list (includes all regular links plus custom links)
+        function buildContact(pi, pl) {
+          const items = [];
+          if (pi.email)
+            items.push(
+              `<li><strong>EMAIL</strong><div>${safe(pi.email)}</div></li>`
+            );
+          if (pi.phone)
+            items.push(
+              `<li><strong>PHONE</strong><div>${safe(pi.phone)}</div></li>`
+            );
+          if (pi.location)
+            items.push(
+              `<li><strong>ADDRESS</strong><div>${safe(pi.location)}</div></li>`
+            );
+
+          // standard links (if provided)
+          ["website", "portfolio", "github", "linkedin"].forEach((k) => {
+            if (pl && pl[k]) {
+              const url = normalizeUrl(pl[k]);
+              items.push(
+                `<li><strong>${safe(
+                  k.toUpperCase()
+                )}</strong><div><a href="${url}" target="_blank" rel="noopener">${safe(
+                  pl[k]
+                )}</a></div></li>`
+              );
+            }
+          });
+
+          // custom links array: [{name,url}]
+          if (Array.isArray(pl.custom) && pl.custom.length) {
+            pl.custom.forEach((c) => {
+              if (c && (c.name || c.url)) {
+                const label = safe(c.name || c.title || "Link");
+                const url = normalizeUrl(c.url || c.href || "");
+                items.push(
+                  `<li><strong>${label}</strong><div>${
+                    url
+                      ? `<a href="${url}" target="_blank" rel="noopener">${safe(
+                          c.url
+                        )}</a>`
+                      : safe(c.name)
+                  }</div></li>`
+                );
+              }
+            });
+          }
+
+          if (!items.length)
+            return '<ul class="contact-list"><li class="small">No contact info</li></ul>';
+          return '<ul class="contact-list">' + items.join("") + "</ul>";
+        }
+
+        // Generic list renderer for left-column lists (skills, languages, hobbies)
+        function listify(arr, opts = {}) {
+          if (!Array.isArray(arr) || !arr.length)
+            return `<ul class="${
+              opts.cls || "skills-list"
+            }"><li class="small">—</li></ul>`;
+          const items = arr
+            .map((item) => {
+              if (typeof item === "string") return `<li>${safe(item)}</li>`;
+              // item is object
+              if (opts.type === "languages") {
+                const name = safe(item.name || item.language || "");
+                const lvl = item.level
+                  ? ` <span class="muted">(${safe(item.level)})</span>`
+                  : "";
+                return `<li>${name}${lvl}</li>`;
+              }
+              if (opts.type === "skills") {
+                const name = `<strong>${safe(
+                  item.name || item.skill || ""
+                )}</strong>`;
+                const cat = item.category
+                  ? ` <span class="muted"><br>(${safe(item.category)})</span>`
+                  : "";
+                const lvl = item.level
+                  ? ` <span class="muted"> <br>${safe(item.level)}</span>`
+                  : "";
+                return `<li>${name}${cat}${lvl}</li>`;
+              }
+
+              // default
+              return `<li>${safe(
+                item.name || item.hobby || item.title || ""
+              )}</li>`;
+            })
+            .join("");
+          return `<ul class="${opts.cls || "skills-list"}">${items}</ul>`;
+        }
+
+        // Experience builder
+        function buildExperience(arr) {
+          if (!Array.isArray(arr) || !arr.length)
+            return emptyNodeHtml("No experience added");
+          return arr
+            .map((e) => {
+              const title = safe(e.jobTitle || e.title || "");
+              const meta = `${safe(e.startDate || "")}${
+                e.endDate ? " - " + safe(e.endDate) : ""
+              }`;
+              const company = safe(e.company || e.employer || "");
+              const desc = e.description
+                ? `<div class="tl-desc">${safe(e.description).replace(
+                    /\n/g,
+                    "<br>"
+                  )}</div>`
+                : "";
+              return `<div class="tl-item"><p class="tl-title">${title} <span class="tl-meta">${meta}</span></p><div class="tl-company">${company}</div>${desc}</div>`;
+            })
+            .join("");
+        }
+
+        // Education builder — use score + scoreType from your form
+        function buildEducation(arr) {
+          if (!Array.isArray(arr) || !arr.length)
+            return emptyNodeHtml("No education added");
+          return arr
+            .map((e) => {
+              const degree = safe(e.degree || "");
+              const inst = safe(e.institution || e.school || "");
+              const meta = `${safe(e.startDate || "")}${
+                e.endDate ? " - " + safe(e.endDate) : ""
+              }`;
+              const desc = e.description
+                ? `<div style="margin-top:6px">${safe(e.description).replace(
+                    /\n/g,
+                    "<br>"
+                  )}</div>`
+                : "";
+              // score + type
+              const score = e.score
+                ? `<div class="muted">${safe(e.scoreType || "")}: ${safe(
+                    e.score
+                  )}</div>`
+                : "";
+              return `<div class="edu-item"><p style="margin:0;font-weight:700">${degree}</p><div class="meta">${inst}<span class="edu-date">${meta}</span></div>${desc}${score}</div>`;
+            })
+            .join("");
+        }
+
+        // Projects (data.projects uses {name, description, startDate, endDate, projectUrl})
+        function buildProjects(arr) {
+          if (!Array.isArray(arr) || !arr.length)
+            return emptyNodeHtml("No projects added");
+          return arr
+            .map((p) => {
+              const title = safe(p.name || p.title || "");
+              const meta = `${safe(p.startDate || "")}${
+                p.endDate ? " - " + safe(p.endDate) : ""
+              }`;
+              const desc = p.description
+                ? `<div class="tl-desc">${safe(p.description).replace(
+                    /\n/g,
+                    "<br>"
+                  )}</div>`
+                : "";
+              const link = p.projectUrl
+                ? `<div><a href="${normalizeUrl(
+                    p.projectUrl
+                  )}" target="_blank" rel="noopener">${safe(
+                    p.projectUrl
+                  )}</a></div>`
+                : "";
+              return `<div class="tl-item"><p class="tl-title">${title} <span class="tl-meta">${meta}</span></p>${desc}${link}</div>`;
+            })
+            .join("");
+        }
+
+        // Certifications
+        function buildCertifications(arr) {
+          if (!Array.isArray(arr) || !arr.length)
+            return emptyNodeHtml("No certifications added");
+          return arr
+            .map((c) => {
+              const title = safe(c.name || "");
+              const meta = `${safe(c.issuer || c.authority || "")}${
+                c.date ? " • " + safe(c.date) : ""
+              }`;
+              const desc = c.description
+                ? `<div class="tl-desc">${safe(c.description).replace(
+                    /\n/g,
+                    "<br>"
+                  )}</div>`
+                : "";
+              const link = c.url
+                ? `<div><a href="${normalizeUrl(
+                    c.url
+                  )}" target="_blank" rel="noopener">${safe(c.url)}</a></div>`
+                : "";
+              return `<div class="tl-item"><p class="tl-title">${title} <span class="tl-meta">${meta}</span></p>${desc}${link}</div>`;
+            })
+            .join("");
+        }
+
+        // Internships
+        function buildInternships(arr) {
+          if (!Array.isArray(arr) || !arr.length)
+            return emptyNodeHtml("No internships added");
+          return arr
+            .map((it) => {
+              const title = safe(it.name || "");
+              const org = safe(it.organization || it.company || "");
+              const meta = `${safe(it.startDate || "")}${
+                it.endDate ? " - " + safe(it.endDate) : ""
+              }`;
+              const desc = it.description
+                ? `<div class="tl-desc">${safe(it.description).replace(
+                    /\n/g,
+                    "<br>"
+                  )}</div>`
+                : "";
+              return `<div class="tl-item"><p class="tl-title">${title} <span class="tl-meta">${meta}</span></p><div class="tl-company">${org}</div>${desc}</div>`;
+            })
+            .join("");
+        }
+
+        // Achievements — support strings or objects like { achievement: "..."} or { text: "..." }
+        function buildAchievements(arr) {
+          if (!Array.isArray(arr) || !arr.length)
+            return emptyNodeHtml("No achievements added");
+          const items = arr
+            .map((a) => {
+              if (!a) return "";
+              if (typeof a === "string") return `<li>${safe(a)}</li>`;
+              if (a.achievement) return `<li>${safe(a.achievement)}</li>`;
+              if (a.text) return `<li>${safe(a.text)}</li>`;
+              // fallback: try common props
+              return `<li>${safe(a.title || a.name || "")}</li>`;
+            })
+            .join("");
+          return `<ul class="skills-list">${items}</ul>`;
+        }
+
+        // Compose final HTML (left + right)
+        const root = document.getElementById("resumeRoot");
+        root.innerHTML = `
+    <div class="resume-header">
+      <div class="name">${safe(pi.fullName || "RICHARD SANCHEZ")}</div>
+      <div class="subtitle">${safe(pi.jobTitle || pi.title || "")}</div>
+    </div>
+
+    <div class="resume-body">
+      <div class="left-col">
+        <div class="avatar" aria-hidden="true"><img id="avatarImg" src="${safe(
+          photo
+        )}" alt="Photo"></div>
+
+        <div class="section-title">CONTACT</div>
+        ${buildContact(pi, pl)}
+
+        <div class="section-title">SKILLS</div>
+        ${listify(data.skills, { type: "skills", cls: "skills-list" })}
+
+        <div class="section-title">LANGUAGES</div>
+        ${listify(data.languages, { type: "languages", cls: "skills-list" })}
+
+        <div class="section-title">HOBBIES</div>
+        ${listify(data.hobbies, { cls: "skills-list" })}
+      </div>
+
+      <div class="right-col">
+        <div class="block"><h2>PROFILE</h2>
+          ${
+            pi.summary
+              ? `<div class="profile-text">${safe(pi.summary).replace(
+                  /\n/g,
+                  "<br>"
+                )}</div>`
+              : '<div style="color:var(--muted)">No profile summary provided</div>'
+          }
+        </div>
+
+        <div class="block"><h2>WORK EXPERIENCE</h2><div class="timeline">${buildExperience(
+          data.experience
+        )}</div></div>
+
+        <div class="block"><h2>EDUCATION</h2>${buildEducation(
+          data.education
+        )}</div>
+
+        <div class="block"><h2>INTERNSHIPS</h2>${buildInternships(
+          data.internships
+        )}</div>
+
+        <div class="block"><h2>PROJECTS</h2>${buildProjects(
+          data.projects
+        )}</div>
+
+        <div class="block"><h2>CERTIFICATIONS</h2>${buildCertifications(
+          data.certifications
+        )}</div>
+
+        
+
+        <div class="block"><h2>ACHIEVEMENTS</h2>${buildAchievements(
+          data.achievements
+        )}</div>
+
+        <div class="block"><h2>ADDITIONAL INFORMATION</h2>${
+          data.additionalInfo
+            ? `<div>${safe(data.additionalInfo).replace(/\n/g, "<br>")}</div>`
+            : '<div style="color:var(--muted)">No additional information</div>'
+        }</div>
+
+        <div class="block"><h2>DECLARATION</h2>${
+          data.declaration
+            ? `<div id="preview-declaration">${safe(data.declaration).replace(
+                /\n/g,
+                "<br>"
+              )}</div>`
+            : '<div style="color:var(--muted)">No declaration provided</div>'
+        }</div>
+      </div>
+    </div>
+  `;
+
+        // Final: hide left or right sections if they contain only placeholders (no real data)
+        // Hide left column lists if they only contain the placeholder entry
+        const leftChecks = [
+          {
+            sel: '.left-col .section-title:contains("SKILLS")',
+            listSel: ".left-col .skills-list",
+          },
+        ];
+        // (Browser querySelector doesn't support :contains — skipping aggressive auto-hide here;
+        //  we rely on the earlier rendering to show placeholders. If you want to completely hide empty sections,
+        //  we can add checks below based on array lengths.)
+        if (!Array.isArray(data.skills) || data.skills.length === 0) {
+          const el = root.querySelector(
+            ".left-col .section-title:nth-of-type(2)"
+          );
+          const list = root.querySelector(".left-col .skills-list");
+          if (list) list.style.display = "none";
+          if (el) el.style.display = "none";
+        }
+        if (!Array.isArray(data.languages) || data.languages.length === 0) {
+          const el = root.querySelector(
+            ".left-col .section-title:nth-of-type(3)"
+          );
+          const list = root.querySelector(
+            ".left-col .skills-list:nth-of-type(2)"
+          );
+          if (list) list.style.display = "none";
+          if (el) el.style.display = "none";
+        }
+        if (!Array.isArray(data.hobbies) || data.hobbies.length === 0) {
+          const el = root.querySelector(
+            ".left-col .section-title:nth-of-type(4)"
+          );
+          const list = root.querySelector(
+            ".left-col .skills-list:nth-of-type(3)"
+          );
+          if (list) list.style.display = "none";
+          if (el) el.style.display = "none";
+        }
+
+        // Hide right-column blocks that are empty (experience, projects, certifications...)
+        function hideIfEmpty(selector, arr) {
+          if (!Array.isArray(arr) || arr.length === 0) {
+            const node = root.querySelector(selector);
+            if (node) node.style.display = "none";
+          }
+        }
+        hideIfEmpty('.block h2:contains("WORK EXPERIENCE")', data.experience); // no native :contains — skip, rely on earlier placeholders
+        // Instead, hide blocks by checking arrays and selecting from the DOM by order:
+        // order in right-col: PROFILE (0), WORK EXPERIENCE (1), INTERNSHIPS (2), PROJECTS (3), CERTIFICATIONS (4), EDUCATION (5), ACHIEVEMENTS (6), ADDITIONAL (7), DECLARATION (8)
+        const rightBlocks = root.querySelectorAll(".right-col .block");
+        if (rightBlocks && rightBlocks.length) {
+          if (!Array.isArray(data.experience) || data.experience.length === 0)
+            rightBlocks[1] && (rightBlocks[1].style.display = "none");
+          if (!Array.isArray(data.internships) || data.internships.length === 0)
+            rightBlocks[2] && (rightBlocks[2].style.display = "none");
+          if (!Array.isArray(data.projects) || data.projects.length === 0)
+            rightBlocks[3] && (rightBlocks[3].style.display = "none");
+          if (
+            !Array.isArray(data.certifications) ||
+            data.certifications.length === 0
+          )
+            rightBlocks[4] && (rightBlocks[4].style.display = "none");
+          if (!Array.isArray(data.education) || data.education.length === 0)
+            rightBlocks[5] && (rightBlocks[5].style.display = "none");
+          if (
+            !Array.isArray(data.achievements) ||
+            data.achievements.length === 0
+          )
+            rightBlocks[6] && (rightBlocks[6].style.display = "none");
+          if (!data.additionalInfo)
+            rightBlocks[7] && (rightBlocks[7].style.display = "none");
+          if (!data.declaration)
+            rightBlocks[8] && (rightBlocks[8].style.display = "none");
+        }
+
+        // no return — IIFE ends
+      })();
+
+      // ---------------- PDF creation ----------------
+      // ---------------- PDF creation ----------------
+      // ---------- Replace the whole existing pdfBtn click handler with this block ----------
+      document.getElementById("pdfBtn").addEventListener("click", async () => {
+        try {
+          log("PDF (screen-capture) start...");
+
+          // ensure required libs are loaded
+          await ensureHtml2Pdf();
+
+          const html2canvasFn =
+            window.html2canvas ||
+            (window.html2pdf && window.html2pdf.html2canvas);
+          const jsPDFClass =
+            window.jsPDF ||
+            (window.jspdf && window.jspdf.jsPDF) ||
+            (window.html2pdf && window.html2pdf.jsPDF);
+
+          if (!html2canvasFn) throw new Error("html2canvas not available.");
+          if (!jsPDFClass) throw new Error("jsPDF not available.");
+
+          // force avatar to data URL (avoid tainted canvas)
+          const avatarImg = document.getElementById("avatarImg");
+          if (avatarImg && avatarImg.src) {
+            try {
+              const dataUrl = await imageUrlToDataUrl(avatarImg.src);
+              avatarImg.src = dataUrl;
+            } catch (e) {
+              log("avatar -> dataUrl conversion failed (continuing):", e);
+            }
+          }
+
+          const rootEl = document.getElementById("resumeRoot");
+          if (!rootEl) throw new Error("resumeRoot element not found.");
+
+          window.scrollTo(0, 0);
+
+          // capture
+          const DPR = 3; // high clarity. kept constant to match other math.
+          const canvas = await html2canvasFn(rootEl, {
+            scale: DPR,
+            useCORS: true,
+            allowTaint: false,
+            logging: false,
+            backgroundColor:
+              window.getComputedStyle(rootEl).backgroundColor || "#ffffff",
+          });
+
+          // A4 sizes in mm and px math
+          const A4_WIDTH_MM = 210;
+          const A4_HEIGHT_MM = 297;
+          const pxPerMm = (96 * DPR) / 25.4; // matches earlier logic
+          const a4Wpx = Math.round(A4_WIDTH_MM * pxPerMm);
+          const a4Hpx = Math.round(A4_HEIGHT_MM * pxPerMm);
+
+          // scale canvas to fit A4 width if needed
+          const capturedW = canvas.width;
+          const capturedH = canvas.height;
+          const widthScale = Math.min(1, a4Wpx / capturedW);
+          const targetWpx = Math.round(capturedW * widthScale);
+          const targetHpx = Math.round(capturedH * widthScale);
+
+          let finalCanvas = canvas;
+          if (widthScale !== 1) {
+            const tmp = document.createElement("canvas");
+            tmp.width = targetWpx;
+            tmp.height = targetHpx;
+            const ctx = tmp.getContext("2d");
+            ctx.imageSmoothingQuality = "high";
+            ctx.drawImage(
+              canvas,
+              0,
+              0,
+              canvas.width,
+              canvas.height,
+              0,
+              0,
+              tmp.width,
+              tmp.height
+            );
+            finalCanvas = tmp;
+          }
+
+          // page slicing geometry (first page different because of bottom margin)
+          const TOP_MARGIN_MM = 12;
+          const BOTTOM_MARGIN_MM = 12;
+          const topMarginPx = Math.round(TOP_MARGIN_MM * pxPerMm);
+          const bottomMarginPx = Math.round(BOTTOM_MARGIN_MM * pxPerMm);
+          const availableHeightPx = a4Hpx - topMarginPx - bottomMarginPx;
+          const firstPageBottomMarginPx = Math.round(
+            BOTTOM_MARGIN_MM * pxPerMm
+          );
+          const firstPageHeightPx = a4Hpx - firstPageBottomMarginPx;
+          const subsequentPageHeightPx = availableHeightPx;
+
+          const actualPages = Math.max(
+            1,
+            Math.ceil(
+              Math.max(0, finalCanvas.height - firstPageHeightPx) /
+                subsequentPageHeightPx
+            ) + (finalCanvas.height > 0 ? 1 : 0)
+          );
+
+          log("capture:", {
+            canvasW: finalCanvas.width,
+            canvasH: finalCanvas.height,
+            a4Wpx,
+            a4Hpx,
+            DPR,
+            widthScale,
+            pages: actualPages,
+          });
+
+          const pageImages = [];
+          const sidebarCssPx = 230; // must match your CSS left column width
+          const sidebarPx = Math.round(sidebarCssPx * DPR * widthScale);
+
+          for (let p = 0; p < actualPages; p++) {
+            const sliceStartY =
+              p === 0
+                ? 0
+                : firstPageHeightPx + (p - 1) * subsequentPageHeightPx;
+
+            const srcH = Math.min(
+              p === 0 ? firstPageHeightPx : subsequentPageHeightPx,
+              Math.max(0, finalCanvas.height - sliceStartY)
+            );
+
+            const pageCanvas = document.createElement("canvas");
+            pageCanvas.width = a4Wpx;
+            pageCanvas.height = a4Hpx;
+            const ctx = pageCanvas.getContext("2d");
+
+            // paint sidebar + white content area so sidebar color fills entire page
+            const sidebarColor = (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--sidebar-bg"
+              ) || "#e9e9eb"
+            ).trim();
+            ctx.fillStyle = sidebarColor;
+            ctx.fillRect(0, 0, sidebarPx, a4Hpx);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(sidebarPx, 0, a4Wpx - sidebarPx, a4Hpx);
+
+            const drawOffsetY = p === 0 ? 0 : topMarginPx;
+
+            // compute destination size so the slice fits the page width (preserve aspect)
+            const destW = a4Wpx;
+            const destH = Math.round(srcH * (destW / finalCanvas.width));
+            const destX = 0;
+            const destY = drawOffsetY;
+
+            if (srcH > 0 && destH > 0) {
+              ctx.drawImage(
+                finalCanvas,
+                0,
+                sliceStartY,
+                finalCanvas.width,
+                srcH,
+                destX,
+                destY,
+                destW,
+                destH
+              );
+            }
+
+            pageImages.push(pageCanvas.toDataURL("image/jpeg", 1.0));
+          }
+
+          const doc = new jsPDFClass({
+            unit: "mm",
+            format: "a4",
+            orientation: "portrait",
+          });
+
+          // ---------- Anchors -> PDF links (robust mapping) ----------
+          // compute anchor rects relative to resumeRoot in CSS px (document coordinates)
+          const anchors = Array.from(rootEl.querySelectorAll("a[href]")).map(
+            (a) => {
+              const href = a.href;
+              const r = a.getBoundingClientRect();
+              const rr = rootEl.getBoundingClientRect();
+              return {
+                href,
+                leftCss: r.left - rr.left,
+                topCss: r.top - rr.top,
+                widthCss: r.width,
+                heightCss: r.height,
+              };
+            }
+          );
+
+          // converter: CSS px -> finalCanvas px -> mm
+          function cssPxToMm(cssPx) {
+            const canvasPx = cssPx * DPR * widthScale; // px in finalCanvas coordinates
+            return canvasPx / pxPerMm; // mm
+          }
+
+          const FIRST_PAGE_HEIGHT_MM = firstPageHeightPx / pxPerMm;
+          const SUBSEQ_PAGE_HEIGHT_MM = subsequentPageHeightPx / pxPerMm;
+
+          anchors.forEach((a) => {
+            if (!a.href) return;
+
+            const leftMm = cssPxToMm(a.leftCss);
+            const topMm = cssPxToMm(a.topCss);
+            const wMm = cssPxToMm(a.widthCss);
+            const hMm = cssPxToMm(a.heightCss);
+
+            function mmToPage(mmY) {
+              if (mmY < FIRST_PAGE_HEIGHT_MM) return 0;
+              return (
+                1 +
+                Math.floor((mmY - FIRST_PAGE_HEIGHT_MM) / SUBSEQ_PAGE_HEIGHT_MM)
+              );
+            }
+
+            const startPage = mmToPage(topMm);
+            const endPage = mmToPage(topMm + hMm - 1e-6);
+
+            for (let page = startPage; page <= endPage; page++) {
+              if (page < 0 || page >= pageImages.length) continue;
+
+              const pageGlobalTopMm =
+                page === 0
+                  ? 0
+                  : FIRST_PAGE_HEIGHT_MM + (page - 1) * SUBSEQ_PAGE_HEIGHT_MM;
+              const pageGlobalBottomMm =
+                page === 0
+                  ? FIRST_PAGE_HEIGHT_MM
+                  : pageGlobalTopMm + SUBSEQ_PAGE_HEIGHT_MM;
+
+              const segTopGlobal = Math.max(topMm, pageGlobalTopMm);
+              const segBottomGlobal = Math.min(topMm + hMm, pageGlobalBottomMm);
+              const segHeightMm = segBottomGlobal - segTopGlobal;
+              if (segHeightMm <= 0) continue;
+
+              let localTopMm;
+              if (page === 0) {
+                localTopMm = segTopGlobal;
+              } else {
+                localTopMm = segTopGlobal - pageGlobalTopMm + TOP_MARGIN_MM;
+              }
+
+              const safeLeft = Math.max(0, leftMm);
+              const safeTop = Math.max(0, localTopMm);
+              const safeWidth = Math.max(0.1, wMm);
+              const safeHeight = Math.max(0.1, segHeightMm);
+
+              doc.addPage(); // We'll add image pages below properly; but jsPDF.link expects the page to exist.
+              // (We won't keep these extra pages — we'll add images next in order properly.)
+              // So instead of doc.addPage here (which creates mis-ordered pages), we'll postpone link adding
+              // and collect link rectangles per page in a map. (Simpler approach below.)
+            }
+          });
+
+          // --- simpler reliable approach: add images to doc first, then create links using same math ---
+          // clear doc pages created by any accidental addPage above (recreate doc clean)
+          const doc2 = new jsPDFClass({
+            unit: "mm",
+            format: "a4",
+            orientation: "portrait",
+          });
+
+          // add all page images
+          for (let p = 0; p < pageImages.length; p++) {
+            if (p > 0) doc2.addPage();
+            doc2.addImage(
+              pageImages[p],
+              "JPEG",
+              0,
+              0,
+              A4_WIDTH_MM,
+              A4_HEIGHT_MM,
+              undefined,
+              "NONE"
+            );
+          }
+
+          // now create links using same mapping but add them to doc2
+          anchors.forEach((a) => {
+            if (!a.href) return;
+
+            const leftMm = cssPxToMm(a.leftCss);
+            const topMm = cssPxToMm(a.topCss);
+            const wMm = cssPxToMm(a.widthCss);
+            const hMm = cssPxToMm(a.heightCss);
+
+            function mmToPage(mmY) {
+              if (mmY < FIRST_PAGE_HEIGHT_MM) return 0;
+              return (
+                1 +
+                Math.floor((mmY - FIRST_PAGE_HEIGHT_MM) / SUBSEQ_PAGE_HEIGHT_MM)
+              );
+            }
+
+            const startPage = mmToPage(topMm);
+            const endPage = mmToPage(topMm + hMm - 1e-6);
+
+            for (let page = startPage; page <= endPage; page++) {
+              if (page < 0 || page >= pageImages.length) continue;
+
+              const pageGlobalTopMm =
+                page === 0
+                  ? 0
+                  : FIRST_PAGE_HEIGHT_MM + (page - 1) * SUBSEQ_PAGE_HEIGHT_MM;
+              const pageGlobalBottomMm =
+                page === 0
+                  ? FIRST_PAGE_HEIGHT_MM
+                  : pageGlobalTopMm + SUBSEQ_PAGE_HEIGHT_MM;
+
+              const segTopGlobal = Math.max(topMm, pageGlobalTopMm);
+              const segBottomGlobal = Math.min(topMm + hMm, pageGlobalBottomMm);
+              const segHeightMm = segBottomGlobal - segTopGlobal;
+              if (segHeightMm <= 0) continue;
+
+              let localTopMm;
+              if (page === 0) localTopMm = segTopGlobal;
+              else localTopMm = segTopGlobal - pageGlobalTopMm + TOP_MARGIN_MM;
+
+              const safeLeft = Math.max(0, leftMm);
+              const safeTop = Math.max(0, localTopMm);
+              const safeWidth = Math.max(0.1, wMm);
+              const safeHeight = Math.max(0.1, segHeightMm);
+
+              // ensure we target the correct page
+              doc2.setPage(page + 1); // jsPDF pages are 1-indexed
+              doc2.link(safeLeft, safeTop, safeWidth, safeHeight, {
+                url: a.href,
+              });
+            }
+          });
+
+          // save using doc2
+          doc2.save("resume.pdf");
+          log("PDF saved.");
+        } catch (err) {
+          console.error("PDF error:", err);
+          alert("PDF generation failed — check console for details.");
+        }
+      });
+      // ---------- end replacement ----------
+
+      // txt download
+      document.getElementById("txtBtn").addEventListener("click", () => {
+        const txt = document.getElementById("resumeRoot").innerText;
+        const blob = new Blob([txt], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "resume.txt";
+        a.click();
+      });
+    </script>
+  </body>
+</html>

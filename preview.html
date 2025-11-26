@@ -469,11 +469,30 @@
           .join("")}</ul>`;
         addSection("Hobbies", html);
       }
-      // ===== Achievements (NEW) =====
+
+      // ===== Achievements (OPTION 3 — One bullet, neat alignment) =====
       if (Array.isArray(data.achievements) && data.achievements.length) {
-        const html = `<ul>${data.achievements
-          .map((a) => `<li>${safe(a.achievement || a)}</li>`)
-          .join("")}</ul>`;
+        const html = data.achievements
+          .map((a) => {
+            const lines = String(a.achievement || a)
+              .split(/\n+/)
+              .filter(Boolean)
+              .map((x) => safe(x));
+
+            if (lines.length === 0) return "";
+
+            // first line with bullet
+            let out = `<p style="margin:2px 0;">• ${lines[0]}</p>`;
+
+            // remaining lines — neat small indent
+            for (let i = 1; i < lines.length; i++) {
+              out += `<p style="padding-left:12px; margin:2px 0;">${lines[i]}</p>`;
+            }
+
+            return out;
+          })
+          .join("");
+
         addSection("Achievements", html);
       }
 

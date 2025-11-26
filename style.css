@@ -567,8 +567,19 @@ select:focus-visible {
   align-items: center;
 }
 .row-3 label {
-
   flex: 1;
 }
-.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+/* Fix Achievements list alignment */
+.resume .list {
+  display: block;
+}
 
+.resume .list li {
+  display: list-item !important;
+  margin: 4px 0;
+}

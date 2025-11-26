@@ -97,7 +97,7 @@
       <!-- Classic Layout -->
       <a href="#" class="resume-card" onclick="chooseDesign('preview.html')">
         <img
-          src="defaulresume.png"
+          src="resume_images/defaulresume.png"
           class="resume-img"
           alt="Classic Resume Layout"
         />
@@ -107,7 +107,7 @@
       <!-- Modern Blue-Green Sidebar -->
       <a href="#" class="resume-card" onclick="chooseDesign('preview2.html')">
         <img
-          src="preview2.png"
+          src="resume_images/preview2.png"
           class="resume-img"
           alt="Modern Blue-Green Sidebar"
         />
@@ -117,19 +117,34 @@
       <!-- Creative Timeline Layout -->
       <a href="#" class="resume-card" onclick="chooseDesign('preview3.html')">
         <img
-          src="resumeimage.jpg"
+          src="resume_images/resumeimage.jpg"
           class="resume-img"
           alt="Creative Timeline Layout"
         />
         <div class="resume-caption">Creative Timeline Layout</div>
+      </a>
+
+      <!-- Modern image-template (NEW) -->
+      <a href="#" class="resume-card" onclick="chooseDesign('preview4.html')">
+        <img
+          src="resume_images/template4.webp"
+          class="resume-img"
+          alt="Modern Image Template"
+        />
+        <div class="resume-caption">Image Sidebar Template (Uploaded)</div>
       </a>
     </div>
 
     <footer>© 2025 Resume Builder by Murty</footer>
 
     <script>
-      function chooseDesign(previewPage) {
-        localStorage.setItem("selectedDesign", previewPage);
+      // Save a simple template id (not a file path) so the editor knows which theme to apply.
+      function chooseDesign(templateId) {
+        // templateId example: 'preview.html' or 'preview2.html' in your old approach.
+        // We store a canonical id so index.html can decide which renderer to use.
+        localStorage.setItem("selectedDesign", templateId);
+        // Open the editor where the user enters details (index.html).
+        // Using _blank (new tab) preserves the gallery page.
         window.open("index.html", "_blank");
       }
     </script>
