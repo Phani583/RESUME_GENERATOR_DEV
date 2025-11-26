@@ -26,7 +26,7 @@
         }
         @page {
           size: A4;
-          margin: 20mm 1mm 18mm 1mm; /* Top Right Bottom Left */
+          margin: 6mm 0mm 6mm 2mm; /* Top Right Bottom Left */
         }
 
         .preview-page,
@@ -42,11 +42,12 @@
         }
         /* 6️⃣ Customize first vs remaining pages */
         @page :first {
-          margin: 2mm 1mm 16mm 1mm; /* smaller for first page */
+          margin: 6mm 0mm 6mm 2mm; /* smaller for first page */
         }
 
         @page {
-          margin: 20mm 1mm 18mm 1mm; /* larger for 2nd+ pages */
+          margin: 6mm 0mm 6mm 2mm;
+          /* margin: 20mm 40mm 18mm 1mm; /* larger for 2nd+ pages */
         }
       }
       /* Main layout */
@@ -67,7 +68,7 @@
         width: 280px;
         background: linear-gradient(180deg, #007bff, #20c997);
         color: white;
-        padding: 30px 20px;
+        padding: 8px 20px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -86,7 +87,7 @@
       }
 
       .sidebar h1 {
-        margin-bottom: 10px;
+        margin-bottom: 30px;
         font-size: 22px;
         text-align: center;
       }
@@ -101,8 +102,8 @@
       .sidebar .links p {
         color: #e3f8ff;
         text-decoration: none;
-        font-size: 14px;
-        margin: 4px 0;
+        font-size: 16px;
+        margin: 8px 0;
         word-wrap: break-word;
       }
 
@@ -121,7 +122,7 @@
       }
 
       .content-body {
-        padding: 40px 50px;
+        padding: 0px 10px;
         color: #333;
       }
 
@@ -133,11 +134,11 @@
 
         .sidebar {
           width: 100%;
-          padding: 20px;
+          padding: 2px 2px;
         }
 
         .content-body {
-          padding: 20px;
+          padding: 0px 10px;
         }
       }
     </style>
@@ -182,7 +183,7 @@
       <span id="fontSizeValue" style="font-size: 14px">16px</span>
     </div>
     <div class="actions">
-      <button onclick="window.print()">Download PDF</button>
+      <button onclick="downloadPDF()">Download PDF</button>
     </div>
 
     <div id="resumeContainer"></div>
@@ -259,18 +260,36 @@
       if (pi.summary)
         addSection("Professional Summary", `<p>${safe(pi.summary)}</p>`);
 
+      // ===== Education Section =====
       if (Array.isArray(data.education)) {
         const html = data.education
-          .map(
-            (e) => `
-          <p><strong>${safe(e.degree || "")}</strong> - ${safe(
-              e.institution || ""
-            )}
-          (${safe(e.startDate || "")} - ${safe(e.endDate || "Present")})</p>
-          ${e.description ? `<p>${safe(e.description)}</p>` : ""}
-        `
-          )
+          .map((e) => {
+            const degree = safe(e.degree || "");
+            const institution = safe(e.institution || "");
+            const start = safe(e.startDate || "");
+            const end = safe(e.endDate || "Present");
+
+            const score = e.score ? ` | Score: ${safe(e.score)}` : "";
+            const type = e.type ? ` | ${safe(e.type)}` : "";
+
+            const description = e.description
+              ? `<p style="margin:4px 0 10px 0;">${safe(e.description)}</p>`
+              : "";
+
+            return `
+        <div style="margin-bottom:10px;">
+          <p style="margin:0; font-weight:600;">
+            ${degree} - ${institution} - ${score}${type}
+            <span style="float:right; color:#555; font-size:14px;">
+              ${start} - ${end}
+            </span>
+          </p>
+          ${description}
+        </div>
+      `;
+          })
           .join("");
+
         addSection("Education", html);
       }
 
@@ -296,6 +315,37 @@
           .join("");
 
         addSection("Experience", html);
+      }
+
+      // ===== Internships Section =====
+      if (Array.isArray(data.internships)) {
+        const html = data.internships
+          .map((i) => {
+            const name = safe(i.name || i.internshipName || "");
+            const org = i.organization ? ` - ${safe(i.organization)}` : "";
+            const dateRange =
+              i.startDate || i.endDate
+                ? ` <span style="float:right; color:#555; font-size:14px;">${safe(
+                    i.startDate || ""
+                  )} - ${safe(i.endDate || "Present")}</span>`
+                : "";
+
+            const description = i.description
+              ? `<p style="margin:4px 0 10px 0;">${safe(i.description)}</p>`
+              : "";
+
+            return `
+        <div style="overflow:hidden; margin-bottom:10px;">
+          <p style="margin:0; font-weight:600; font-size:15px;">
+            ${name}${org}${dateRange}
+          </p>
+          ${description}
+        </div>
+      `;
+          })
+          .join("");
+
+        addSection("Internships", html);
       }
 
       if (Array.isArray(data.projects)) {
@@ -331,6 +381,47 @@
         addSection("Projects", html);
       }
 
+      // ===== Certifications Section =====
+      if (Array.isArray(data.certifications)) {
+        const html = data.certifications
+          .map((c) => {
+            const name = safe(c.name || "");
+            const issuer = c.issuer ? ` - ${safe(c.issuer)}` : "";
+            const date = c.date ? `  ${safe(c.date)}` : "";
+
+            // Show full URL directly
+            const urlValue =
+              c.certificateUrl || c.certificateURL || c.url || c.link || "";
+
+            const url = urlValue
+              ? ` - <a href="${safe(
+                  urlValue
+                )}" target="_blank" style="color:#0066cc;">${safe(
+                  urlValue
+                )}</a>`
+              : "";
+
+            const description = c.description
+              ? `<p style="margin:4px 0 10px 0;">${safe(c.description)}</p>`
+              : "";
+
+            return `
+        <div style="overflow:hidden; margin-bottom:10px;">
+          <p style="margin:0; font-weight:600; font-size:15px;">
+            ${name}${issuer}${url}
+            <span style="float:right; color:#555; font-size:14px;">
+              ${date}
+            </span>
+          </p>
+          ${description}
+        </div>
+      `;
+          })
+          .join("");
+
+        addSection("Certifications", html);
+      }
+
       if (Array.isArray(data.skills)) {
         const html = data.skills
           .map((s) => {
@@ -341,24 +432,61 @@
                   s.description
                 )}</p>`
               : "";
-            return `<p><strong>${name}</strong>${level}</p>${description}`;
+            return `<li style="margin-bottom:6px;margin-left:10px"><strong>${name}</strong>${level}</li>${description}`;
           })
           .join("");
         addSection("Skills", html);
       }
 
       if (Array.isArray(data.languages)) {
-        const html = `<ul>${data.languages
-          .map((l) => `<li>${safe(l.name || "")}</li>`)
-          .join("")}</ul>`;
+        const html = `${data.languages
+          .map(
+            (l) =>
+              `<li style="margin-bottom:6px;margin-left:10px">${safe(
+                l.name || ""
+              )}</li>`
+          )
+          .join("")}`;
         addSection("Languages", html);
       }
 
       if (Array.isArray(data.hobbies)) {
-        const html = `<ul>${data.hobbies
-          .map((h) => `<li>${safe(h.hobby || "")}</li>`)
-          .join("")}</ul>`;
+        const html = `${data.hobbies
+          .map(
+            (h) =>
+              `<li style="margin-bottom:6px;margin-left:10px">${safe(
+                h.hobby || ""
+              )}</li>`
+          )
+          .join("")}`;
         addSection("Hobbies", html);
+      }
+
+      // ===== Achievements Section =====
+      // --- FIX for [object Object] issue ---
+      if (data.achievements) {
+        // Convert object {ach1: "...", ach2: "..."} → array
+        if (!Array.isArray(data.achievements)) {
+          data.achievements = Object.values(data.achievements);
+        }
+
+        // Convert [{text:"x"}, {text:"y"}] → ["x","y"]
+        data.achievements = data.achievements.map((a) => {
+          if (typeof a === "object" && a !== null) {
+            return a.text || a.value || Object.values(a)[0];
+          }
+          return a; // already a string
+        });
+      }
+
+      if (Array.isArray(data.achievements)) {
+        const html = data.achievements
+          .map(
+            (a) =>
+              `<li style="margin-bottom:6px; margin-left:10px;">${safe(a)}</li>`
+          )
+          .join("");
+        addSection("Achievements", html);
       }
 
       if (data.additionalInfo)
@@ -368,16 +496,6 @@
         );
       if (data.declaration)
         addSection("Declaration", `<p>${safe(data.declaration)}</p>`);
-
-      // Download as TXT
-      function downloadTxt() {
-        const text = document.querySelector(".resume-wrapper").innerText;
-        const blob = new Blob([text], { type: "text/plain" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "resume.txt";
-        a.click();
-      }
 
       // Hide controls during print
       function downloadPDF() {
@@ -404,6 +522,20 @@
           value.textContent = saved;
         }
       })();
+
+      function downloadPDF() {
+        const element = document.querySelector(".resume-wrapper");
+
+        const opt = {
+          margin: 0,
+          filename: "Resume.pdf",
+          image: { type: "jpeg", quality: 1 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        };
+
+        html2pdf().set(opt).from(element).save();
+      }
     </script>
 
     <style>
@@ -475,7 +607,7 @@
 
         .sidebar {
           width: 220px;
-          padding: 20px 15px;
+          padding: 2px 10px;
           flex-shrink: 0;
           justify-content: flex-start;
         }
@@ -486,16 +618,16 @@
         }
 
         .sidebar h1 {
-          font-size: 18px;
+          font-size: 16px;
         }
 
         .sidebar .links a,
         .sidebar .links p {
-          font-size: 12px;
+          font-size: 14px;
         }
 
         .content-body {
-          padding: 30px 35px;
+          padding: 0px 10px;
         }
       }
 
@@ -508,7 +640,7 @@
       }
 
       .content-body {
-        padding: 10px;
+        padding: 0px 10px;
         color: #333;
       }
 
@@ -532,7 +664,7 @@
 
         .sidebar {
           width: 220px;
-          padding: 20px 15px;
+          padding: 4px 15px;
           flex-shrink: 0;
           justify-content: flex-start;
         }
@@ -544,15 +676,17 @@
 
         .sidebar h1 {
           font-size: 18px;
+          padding: 6px 0px;
         }
 
         .sidebar .links a,
         .sidebar .links p {
-          font-size: 12px;
+          font-size: 16px;
+          padding: 5px 0px;
         }
 
         .content-body {
-          padding: 30px 35px;
+          padding: 0px 10px;
         }
       }
 
@@ -564,11 +698,11 @@
 
         .sidebar {
           width: 100%;
-          padding: 20px;
+          padding: 2px 2px;
         }
 
         .content-body {
-          padding: 20px;
+          padding: 0px 10px;
         }
       }
 
@@ -634,5 +768,6 @@
         }
       }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   </body>
 </html>
