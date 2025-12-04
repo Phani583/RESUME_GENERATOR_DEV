@@ -1,0 +1,472 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Resume Preview 3 – Timeline Layout</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+      body {
+        font-family: "Segoe UI", Roboto, sans-serif;
+        background: #f6f5f2;
+        margin: 0;
+        color: #222;
+      }
+
+      .resume-wrapper {
+        max-width: 950px;
+        margin: 0px auto;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 40px;
+        transition: font-size 0.2s ease-in-out;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 26px;
+      }
+
+      .header .contact {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #555;
+      }
+
+      .section {
+        margin-top: 30px;
+      }
+
+      .section h2 {
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 4px;
+        color: #007bff;
+        margin-bottom: 20px;
+      }
+
+      /* --- TIMELINE STYLE --- */
+      .timeline {
+        position: relative;
+        margin: 20px 0 0 20px;
+        padding-left: 20px;
+      }
+
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, #007bff, #20c997);
+        border-radius: 4px;
+      }
+
+      .timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+      }
+
+      .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: -30px;
+        top: 5px;
+        width: 14px;
+        height: 14px;
+        background: white;
+        border: 3px solid #007bff;
+        border-radius: 50%;
+        box-shadow: 0 0 0 3px #e5f1ff;
+      }
+
+      .timeline-item h3 {
+        margin: 0;
+        color: #222;
+        font-size: 17px;
+      }
+
+      .timeline-item p {
+        margin: 4px 0;
+        color: #555;
+        font-size: 14px;
+      }
+
+      .timeline-item small {
+        display: block;
+        color: #007bff;
+        font-size: 13px;
+        margin-bottom: 5px;
+      }
+
+      /* --- Non-timeline sections --- */
+      ul {
+        margin-left: 20px;
+        padding-left: 10px;
+      }
+
+      li {
+        margin-bottom: 6px;
+      }
+
+      .actions {
+        margin: 20px auto;
+        text-align: center;
+      }
+      .actions button {
+        margin: 0 6px;
+        padding: 10px 14px;
+      }
+
+      #fontSizeControls {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin: 15px auto;
+        max-width: 950px;
+        padding: 5px 10px;
+        background: #f8f8f8;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      #fontSizeControls input[type="range"] {
+        width: 120px;
+        accent-color: #007bff;
+      }
+
+      @media print {
+        /* Hide buttons & controls */
+        .actions,
+        #fontSizeControls,
+        #topControls {
+          display: none !important;
+        }
+
+        /* Remove browser default margins */
+        @page {
+          size: A4;
+          margin: 0;
+        }
+
+        /* Full white background */
+        body {
+          background: white !important;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* Perfect print margins */
+        .resume-wrapper {
+          margin: 8mm !important; /* Clean and balanced margins */
+          padding: 0 !important; /* Remove extra internal padding */
+          box-shadow: none !important;
+          border-radius: 0 !important;
+          width: auto !important;
+        }
+      }
+
+      /* Toolbar styling (Preview2 style) */
+      #topControls {
+        position: fixed;
+        top: 10px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        padding: 10px 15px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        z-index: 9999;
+        font-family: Arial, sans-serif;
+      }
+
+      #fontSizeControls input[type="range"] {
+        width: 120px;
+        accent-color: #007bff;
+        cursor: pointer;
+      }
+
+      /* Responsive mobile view */
+      @media (max-width: 600px) {
+        #topControls {
+          flex-direction: column;
+          width: 90%;
+          right: 10px;
+          top: 10px;
+          gap: 10px;
+        }
+
+        #fontSizeControls input[type="range"] {
+          width: 100%;
+        }
+
+        .actions {
+          width: 100%;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+          justify-content: flex-start;
+        }
+
+        #topSpacer {
+          height: 120px; /* extra space for stacked toolbar */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Toolbar (Preview2 style) -->
+    <div
+      id="fontSizeControls"
+      style="
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 12px 14px;
+        background: #f8f8f8;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <label for="fontSizeRange" style="font-size: 15px">Font Size:</label>
+      <input
+        type="range"
+        id="fontSizeRange"
+        min="12"
+        max="24"
+        value="16"
+        step="1"
+      />
+      <span id="fontSizeValue" style="font-size: 14px">16px</span>
+    </div>
+    <div class="actions">
+      <button onclick="window.print()">Download PDF</button>
+    </div>
+
+    <div class="resume-wrapper" id="resume"></div>
+
+    <script>
+      const data = JSON.parse(localStorage.getItem("resumeData") || "{}");
+      const resume = document.getElementById("resume");
+
+      function safe(s = "") {
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;",
+            }[c])
+        );
+      }
+
+      function ensureUrl(url) {
+        if (!url) return "";
+        url = String(url).trim();
+        return /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(url) ? url : "https://" + url;
+      }
+
+      const pi = data.personalInfo || {};
+      const pl = data.publicLinks || {};
+
+      // HEADER
+      const contact = [];
+      if (pi.email)
+        contact.push(`<a href="mailto:${pi.email}">${safe(pi.email)}</a>`);
+      if (pi.phone) contact.push(safe(pi.phone));
+      if (pi.location) contact.push(safe(pi.location));
+      ["github", "linkedin", "portfolio", "website"].forEach((k) => {
+        const v = pl[k];
+        if (v)
+          contact.push(
+            `<a href="${ensureUrl(v)}" target="_blank">${safe(k)}</a>`
+          );
+      });
+
+      resume.innerHTML = `
+        <div class="header">
+          ${
+            pi.profilePhoto
+              ? `<img src="${pi.profilePhoto}" width="100" height="100" style="border-radius:50%;object-fit:cover;margin-bottom:10px;">`
+              : ""
+          }
+          <h1>${safe(pi.fullName || "")}</h1>
+          <div class="contact">${contact.join(" | ")}</div>
+        </div>
+      `;
+
+      function addSection(title, html) {
+        if (html && html.trim()) {
+          resume.innerHTML += `<div class="section"><h2>${title}</h2>${html}</div>`;
+        }
+      }
+
+      // Summary
+      if (pi.summary)
+        addSection("Professional Summary", `<p>${safe(pi.summary)}</p>`);
+
+      // Timeline-based sections
+      function buildTimeline(arr, formatter) {
+        if (!Array.isArray(arr) || !arr.length) return "";
+        return `<div class="timeline">${arr.map(formatter).join("")}</div>`;
+      }
+
+      // Experience
+      if (Array.isArray(data.experience) && data.experience.length) {
+        const html = buildTimeline(
+          data.experience,
+          (e) => `
+          <div class="timeline-item">
+            <small>${safe(e.startDate || "")} - ${safe(
+            e.endDate || "Present"
+          )}</small>
+            <h3>${safe(e.jobTitle || "")}</h3>
+            <p>${safe(e.company || "")}</p>
+            ${e.description ? `<p>${safe(e.description)}</p>` : ""}
+          </div>
+        `
+        );
+        addSection("Work Experience", html);
+      }
+
+      // Education
+      if (Array.isArray(data.education) && data.education.length) {
+        const html = buildTimeline(
+          data.education,
+          (e) => `
+          <div class="timeline-item">
+            <small>${safe(e.startDate || "")} - ${safe(
+            e.endDate || "Present"
+          )}</small>
+            <h3>${safe(e.degree || "")}</h3>
+            <p>${safe(e.institution || "")}</p>
+            ${e.description ? `<p>${safe(e.description)}</p>` : ""}
+          </div>
+        `
+        );
+        addSection("Education", html);
+      }
+
+      // Internships
+      if (Array.isArray(data.internships) && data.internships.length) {
+        const html = buildTimeline(
+          data.internships,
+          (i) => `
+          <div class="timeline-item">
+            <small>${safe(i.startDate || "")} - ${safe(
+            i.endDate || "Present"
+          )}</small>
+            <h3>${safe(i.name || "")}</h3>
+            <p>${safe(i.organization || "")}</p>
+            ${i.description ? `<p>${safe(i.description)}</p>` : ""}
+          </div>
+        `
+        );
+        addSection("Internships", html);
+      }
+
+      // Projects
+      if (Array.isArray(data.projects)) {
+        const html = data.projects
+          .map(
+            (p) => `
+          <p><strong>${safe(p.name || "")}</strong> ${
+              p.projectUrl
+                ? `- <a href="${ensureUrl(
+                    p.projectUrl
+                  )}" target="_blank">${safe(p.projectUrl)}</a>`
+                : ""
+            }</p>
+          ${p.description ? `<p>${safe(p.description)}</p>` : ""}
+        `
+          )
+          .join("");
+        addSection("Projects", html);
+      }
+
+      // Skills
+      if (Array.isArray(data.skills)) {
+        const html = `<ul>${data.skills
+          .map((s) => `<li>${safe(s.name || "")}</li>`)
+          .join("")}</ul>`;
+        addSection("Skills", html);
+      }
+
+      // Languages
+      if (Array.isArray(data.languages)) {
+        const html = `<ul>${data.languages
+          .map((l) => `<li>${safe(l.name || "")}</li>`)
+          .join("")}</ul>`;
+        addSection("Languages", html);
+      }
+
+      // Hobbies
+      if (
+        Array.isArray(data.hobbies) &&
+        data.hobbies.some((h) => h.hobby && h.hobby.trim() !== "")
+      ) {
+        const html = `<ul>${data.hobbies
+          .filter((h) => h.hobby && h.hobby.trim() !== "")
+          .map((h) => `<li>${safe(h.hobby)}</li>`)
+          .join("")}</ul>`;
+        addSection("Hobbies", html);
+      }
+
+      // Additional Info + Declaration
+      if (data.additionalInfo)
+        addSection(
+          "Additional Information",
+          `<p>${safe(data.additionalInfo)}</p>`
+        );
+      if (data.declaration)
+        addSection("Declaration", `<p>${safe(data.declaration)}</p>`);
+
+      // TXT Download
+      function downloadTxt() {
+        const text = resume.innerText;
+        const blob = new Blob([text], { type: "text/plain" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "resume_timeline.txt";
+        a.click();
+      }
+
+      // Font size handler
+      document.addEventListener("input", (e) => {
+        if (e.target.id === "fontSizeRange") {
+          const size = e.target.value + "px";
+          document.querySelector(".resume-wrapper").style.fontSize = size;
+          document.getElementById("fontSizeValue").textContent = size;
+          localStorage.setItem("preview3FontSize", size);
+        }
+      });
+
+      (function applySavedFontSize() {
+        const saved = localStorage.getItem("preview3FontSize");
+        const range = document.getElementById("fontSizeRange");
+        const value = document.getElementById("fontSizeValue");
+        if (saved) {
+          document.querySelector(".resume-wrapper").style.fontSize = saved;
+          range.value = parseInt(saved);
+          value.textContent = saved;
+        }
+      })();
+    </script>
+  </body>
+</html>

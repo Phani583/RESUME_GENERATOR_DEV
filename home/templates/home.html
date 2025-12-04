@@ -1,0 +1,1061 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>Choose Resume Design</title>
+    <style>
+      /* ---------- Vars & base ---------- */
+      :root {
+        --bg-1: #f6efe6;
+        --accent: #2f2b25;
+        --muted: #7b6f66;
+        --card-bg: #fff;
+        --glass: rgba(255, 255, 255, 0.6);
+        --overlay-glass: rgba(255, 255, 255, 0.14); /* light glass for pill */
+        --text-glow: rgba(255, 255, 255, 0.85);
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: "Poppins", system-ui, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: linear-gradient(180deg, #f7f3ee 0%, #f1eadd 0%, #efe6da 0%);
+        color: var(--accent);
+      }
+
+      /* ---------- Page container ---------- */
+      .page {
+        max-width: 1300px;
+        margin: 12px auto;
+        padding: 18px;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .brand h2 {
+        margin: 0;
+        font-size: 20px;
+        letter-spacing: 0.01em;
+      }
+
+      .btn {
+        background: var(--card-bg);
+        border-radius: 10px;
+        padding: 8px 14px;
+        box-shadow: 0 6px 18px rgba(34, 34, 34, 0.06);
+        border: 1px solid rgba(34, 34, 34, 0.05);
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      /* ---------- Hero ---------- */
+      .hero {
+        text-align: center;
+        margin: 34px 0;
+        padding: 32px 22px;
+        border-radius: 18px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.5),
+          rgba(255, 255, 255, 0.35)
+        );
+        box-shadow: 0 6px 24px rgba(34, 34, 34, 0.06);
+      }
+      .hero h1 {
+        margin: 0 0 12px 0;
+        font-size: 44px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        color: var(--accent);
+        transform: translateY(12px);
+        opacity: 0;
+        animation: fadeUp 600ms cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+      }
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 16px;
+        opacity: 0;
+        transform: translateY(8px);
+        animation: fadeUp 700ms cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+        animation-delay: 80ms;
+      }
+
+      @keyframes fadeUp {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* ---------- Filters row (animated pills) ---------- */
+      .filters {
+        margin: 26px 0;
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: nowrap;
+        position: relative;
+        padding-bottom: 12px;
+        align-items: center;
+      }
+
+      .pill {
+        --pill-pad-x: 14px;
+        --pill-pad-y: 10px;
+        position: relative;
+        background: transparent;
+        border: 1px solid rgba(47, 47, 47, 0.06);
+        padding: var(--pill-pad-y) var(--pill-pad-x);
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+        transform-origin: center;
+        transition: transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
+          box-shadow 260ms ease, color 160ms ease, background 220ms ease;
+      }
+
+      .pill::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.02)
+        );
+        transform: scale(0.96);
+        opacity: 0;
+        transition: transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
+          opacity 220ms ease;
+      }
+
+      .pill:hover,
+      .pill:focus {
+        transform: translateY(-6px) rotate(-0.6deg) scale(1.04);
+        box-shadow: 0 12px 30px rgba(16, 24, 40, 0.14);
+      }
+      .pill:hover::before,
+      .pill:focus::before {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .pill.active {
+        background: #fff;
+        box-shadow: 0 12px 30px rgba(20, 20, 20, 0.07);
+        transform: translateY(-8px) scale(1.06);
+      }
+
+      .pill.active.pulse {
+        animation: pillPulse 420ms cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+      }
+
+      .filters .pill-underline {
+        display: none !important;
+      }
+
+      /* ---------- Grid: 4 in a row ---------- */
+      .resume-gallery {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        margin-top: 12px;
+      }
+
+      @media (max-width: 1200px) {
+        .resume-gallery {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (max-width: 880px) {
+        .resume-gallery {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .hero h1 {
+          font-size: 32px;
+        }
+      }
+      @media (max-width: 520px) {
+        .resume-gallery {
+          grid-template-columns: 1fr;
+        }
+        .hero {
+          padding: 20px;
+        }
+      }
+
+      /* ---------- Card (paper-like) + image hover animations ---------- */
+      .resume-card {
+        background: var(--card-bg);
+        border-radius: 14px;
+        overflow: visible;
+        padding: 12px;
+        border: 1px solid rgba(34, 34, 34, 0.04);
+        box-shadow: 0 12px 30px rgba(16, 24, 40, 0.06);
+        transform-origin: center;
+        transition: transform 300ms cubic-bezier(0.2, 0.9, 0.2, 1),
+          box-shadow 300ms ease;
+        will-change: transform;
+        cursor: pointer;
+        perspective: 1200px;
+      }
+
+      .resume-card {
+        opacity: 0;
+        transform: translateY(18px) scale(0.995);
+        animation: cardIn 560ms cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+      }
+      .resume-card:nth-child(1) {
+        animation-delay: 80ms;
+      }
+      .resume-card:nth-child(2) {
+        animation-delay: 140ms;
+      }
+      .resume-card:nth-child(3) {
+        animation-delay: 200ms;
+      }
+      .resume-card:nth-child(4) {
+        animation-delay: 260ms;
+      }
+      .resume-card:nth-child(5) {
+        animation-delay: 320ms;
+      }
+      @keyframes cardIn {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .resume-card .surface {
+        border-radius: 10px;
+        overflow: hidden;
+        transform-style: preserve-3d;
+        transition: transform 420ms cubic-bezier(0.18, 0.9, 0.32, 1),
+          box-shadow 420ms ease;
+        will-change: transform;
+        position: relative;
+        background: transparent;
+      }
+
+      .resume-canvas {
+        display: block;
+        width: 100%;
+        height: 360px;
+        background: linear-gradient(180deg, #ffffff, #fbfbfb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* stronger picture clarity + small overscale for crisp zoom */
+      .resume-img {
+        width: auto;
+        height: 100%;
+        max-width: 110%;
+        max-height: 110%;
+        object-fit: cover;
+        display: block;
+        border-radius: 6px;
+        box-shadow: 0 12px 30px rgba(8, 12, 18, 0.06);
+        transform-origin: center;
+        transition: transform 520ms cubic-bezier(0.2, 0.9, 0.2, 1),
+          filter 420ms ease, box-shadow 420ms ease;
+        will-change: transform, filter, box-shadow;
+      }
+
+      /* very subtle vignette — reduced so image stays bright */
+      .resume-canvas::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        border-radius: 8px;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(0, 0, 0, 0) 55%,
+          rgba(0, 0, 0, 0.02) 100%
+        );
+        opacity: 1;
+        transition: opacity 420ms ease;
+      }
+
+      /* caption always visible (kept static) */
+      .resume-caption {
+        margin-top: 12px;
+        text-align: center;
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 15px;
+        opacity: 1;
+        transform: none;
+        height: auto;
+        overflow: visible;
+        pointer-events: auto;
+        transition: none;
+      }
+
+      /* hover interactions on card */
+      .resume-card:hover {
+        transform: translateY(-8px) scale(1.006);
+        box-shadow: 0 48px 120px rgba(18, 22, 30, 0.14);
+      }
+
+      .resume-card:hover .surface {
+        transform: rotateX(3deg) rotateY(-5deg) translateZ(8px);
+      }
+
+      /* Image becomes brighter + sharper + slight zoom on hover so templates stay clear */
+      .resume-card:hover .resume-img {
+        transform: scale(1.08) translateZ(12px);
+        filter: saturate(1.08) brightness(1.06) contrast(1.03);
+        box-shadow: 0 18px 48px rgba(6, 10, 20, 0.12);
+      }
+
+      /* reduce vignette when hovered so image appears clearer */
+      .resume-card:hover .resume-canvas::after,
+      .resume-card:focus-within .resume-canvas::after {
+        opacity: 0; /* remove darkening on hover */
+      }
+
+      .resume-card:focus-within {
+        outline: 3px solid rgba(47, 123, 255, 0.12);
+      }
+
+      .resume-card:active {
+        transform: translateY(-4px) scale(0.999);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        /* When users prefer reduced motion, remove animations but ensure elements are visible.
+     Make final visible state explicit (opacity:1, no transforms). */
+        .resume-card,
+        .resume-card .surface,
+        .resume-img,
+        .resume-caption,
+        .resume-canvas::after {
+          transition: none !important;
+          animation: none !important;
+          opacity: 1 !important; /* ensure visible */
+          transform: none !important; /* reset any translate/scale/rotate */
+        }
+
+        /* Also remove hover transform effects (so there is no visual movement) */
+        .resume-card:hover .resume-img,
+        .resume-card:hover .surface,
+        .resume-card:hover .resume-caption,
+        .resume-card:hover {
+          transform: none !important;
+          opacity: 1 !important;
+          box-shadow: none !important;
+        }
+      }
+
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+        margin: 36px 0 12px;
+      }
+
+      /* ---------- Hover Overlay as a small pill (non-dark) ---------- */
+      /* NOTE: changed to a small glassy pill at bottom-center so it does NOT darken the image */
+      .hover-overlay {
+        position: absolute;
+        bottom: 18px; /* sits near bottom of image */
+        left: 50%;
+        transform: translate(-50%, 12px); /* starts slightly down */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: var(--accent);
+
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.14),
+          rgba(255, 255, 255, 0.06)
+        ); /* very light glass — doesn't darken */
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 8px 24px rgba(6, 10, 20, 0.06);
+        backdrop-filter: blur(6px) saturate(1.06);
+        border-radius: 999px;
+        padding: 8px 14px;
+
+        opacity: 0;
+        pointer-events: none; /* overlay won't block clicks */
+        transition: opacity 320ms cubic-bezier(0.2, 0.9, 0.2, 1),
+          transform 420ms cubic-bezier(0.2, 0.9, 0.2, 1), box-shadow 420ms ease;
+        z-index: 40;
+      }
+
+      /* text styling so it reads on any image without darkening the whole image */
+      .hover-overlay span {
+        color: var(--accent);
+        text-shadow: 0 6px 18px rgba(255, 255, 255, 0.06),
+          0 2px 6px rgba(0, 0, 0, 0.14);
+      }
+
+      /* slide-in from left: overlay enters with translateX animation on hover */
+      .hover-overlay::before {
+        content: "";
+        position: absolute;
+        left: -38%;
+        top: 0;
+        width: 36%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.25) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        transform: skewX(-12deg) translateX(-18px);
+        opacity: 0;
+        transition: transform 720ms cubic-bezier(0.18, 0.9, 0.32, 1),
+          opacity 420ms ease;
+        border-radius: 999px;
+        pointer-events: none;
+      }
+
+      /* show + animate shine when hovered */
+      .resume-card:hover .hover-overlay,
+      .resume-card:focus-within .hover-overlay {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      .resume-card:hover .hover-overlay::before {
+        opacity: 1;
+        transform: skewX(-12deg) translateX(140%);
+      }
+
+      /* ---------- Shine effect remains on top of image but subtle ---------- */
+      .surface::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -120%;
+        width: 60%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.28) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        transform: skewX(-20deg);
+        opacity: 0;
+        pointer-events: none;
+        z-index: 30;
+        transition: opacity 0.4s ease,
+          transform 0.7s cubic-bezier(0.2, 0.9, 0.2, 1);
+      }
+
+      .resume-card:hover .surface::before {
+        opacity: 1;
+        transform: translateX(250%) skewX(-20deg);
+      }
+      /* overlay actions (small glassy pill with two buttons) */
+      .overlay-actions {
+        position: absolute;
+        bottom: 18px;
+        left: 50%;
+        transform: translate(-50%, 12px);
+        display: flex;
+        gap: 8px;
+        z-index: 40;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.32s, transform 0.42s;
+      }
+      .resume-card:hover .overlay-actions,
+      .resume-card:focus-within .overlay-actions {
+        opacity: 1;
+        transform: translate(-50%, 0);
+        pointer-events: auto;
+      }
+
+      .overlay-actions button {
+        background: linear-gradient(
+          180deg,
+          rgba(245, 222, 189, 0.32),
+          rgba(235, 200, 160, 0.18)
+        ); /* warm gold/beige glow */
+        border: 1px solid rgba(185, 150, 115, 0.35);
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+        backdrop-filter: blur(8px) saturate(1.3);
+        box-shadow: 0 10px 28px rgba(120, 90, 60, 0.25),
+          0 4px 12px rgba(0, 0, 0, 0.1);
+        color: #3a2f24; /* deeper brown for readability */
+        transition: transform 0.22s ease, box-shadow 0.22s ease,
+          background 0.22s ease;
+      }
+
+      /* Hover boost */
+      .overlay-actions button:hover {
+        transform: translateY(-4px) scale(1.05);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 235, 205, 0.48),
+          rgba(240, 210, 170, 0.26)
+        );
+        box-shadow: 0 16px 38px rgba(100, 75, 50, 0.32),
+          0 6px 16px rgba(0, 0, 0, 0.18);
+      }
+
+      /* Pressed effect */
+      .overlay-actions button:active {
+        transform: scale(0.96);
+      }
+
+      .btn-preview {
+        min-width: 82px;
+      }
+      .btn-select {
+        min-width: 72px;
+      }
+
+      /* Modal preview (minimal styles) */
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(6, 10, 18, 0.45);
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s;
+      }
+      .modal.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      /* ---------- Premium modal: fade-in + zoom ---------- */
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.66); /* semi-dark glass */
+        backdrop-filter: blur(4px) saturate(1.05);
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 260ms ease;
+      }
+
+      .modal.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* inner content will animate with zoom */
+      .modal-inner {
+        width: 94vw;
+        max-width: 1400px;
+        height: 86vh;
+        max-height: 980px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent; /* no white box */
+        padding: 0;
+        border-radius: 12px;
+        transform-origin: center;
+        will-change: transform, opacity;
+        /* start state: slightly smaller and down */
+        opacity: 0;
+        transform: scale(0.96) translateY(10px);
+        position: relative;
+      }
+
+      /* final animated state */
+      .modal.open .modal-inner {
+        animation: modalZoomIn 420ms cubic-bezier(0.18, 0.9, 0.32, 1) forwards;
+      }
+
+      /* image */
+      .modal-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* full fit inside viewport */
+        border-radius: 12px;
+        box-shadow: 0 28px 80px rgba(4, 8, 18, 0.56),
+          0 0 36px rgba(255, 255, 255, 0.04);
+      }
+
+      /* subtle close button */
+      /* --- Background-Matching Luxury Button --- */
+
+      .modal-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+
+        background: linear-gradient(
+          135deg,
+          #f4e8d6 0%,
+          /* warm cream */ #e3d2b8 45%,
+          /* beige tone */ #c8b08a 100% /* soft golden-brown */
+        ); /* perfectly matches your background palette */
+
+        color: #2f2b25; /* dark accent used in your theme */
+        border: 0;
+        border-radius: 999px;
+
+        padding: 12px 14px;
+        font-size: 20px;
+        cursor: pointer;
+
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        box-shadow: 0 8px 22px rgba(60, 50, 40, 0.18),
+          0 0 16px rgba(250, 240, 225, 0.3);
+
+        transition: transform 0.22s ease, box-shadow 0.22s ease,
+          opacity 0.22s ease;
+      }
+
+      /* Hover */
+      .modal-close:hover {
+        transform: translateY(-3px) scale(1.04);
+        opacity: 0.98;
+
+        box-shadow: 0 14px 32px rgba(60, 50, 40, 0.25),
+          0 0 28px rgba(255, 250, 235, 0.45);
+      }
+
+      /* Focus outline */
+      .modal-close:focus-visible {
+        outline: 3px solid rgba(155, 140, 115, 0.35);
+        outline-offset: 3px;
+      }
+
+      /* keyframes */
+      @keyframes modalZoomIn {
+        from {
+          opacity: 0;
+          transform: scale(0.96) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      /* responsive tweaks */
+      @media (max-width: 720px) {
+        .modal-inner {
+          width: 96vw;
+          height: 76vh;
+        }
+        .modal-close {
+          top: 10px;
+          right: 10px;
+          font-size: 16px;
+          padding: 6px 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div class="brand">
+          <svg
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            style="opacity: 0.95"
+          >
+            <rect width="24" height="24" rx="6" fill="#F5D3B8"></rect>
+            <path d="M6 15V9h12v6H6z" fill="#2f2b25"></path>
+          </svg>
+          <h2>Resume Builder</h2>
+        </div>
+      </header>
+
+      <section class="hero" aria-labelledby="choose-heading">
+        <h1 id="choose-heading">Choose Your Perfect Template</h1>
+        <p>
+          Select from professionally designed templates and customize to match
+          your style
+        </p>
+      </section>
+
+      <nav class="filters" aria-label="Template filters">
+        <button class="pill active" data-filter="all" id="filter-all">
+          All Templates
+        </button>
+        <button class="pill" data-filter="modern" id="filter-modern">
+          Modern
+        </button>
+        <button class="pill" data-filter="classic" id="filter-classic">
+          Classic
+        </button>
+        <button
+          class="pill"
+          data-filter="professional"
+          id="filter-professional"
+        >
+          Professional
+        </button>
+      </nav>
+
+      <main>
+        <div id="gallery" class="resume-gallery" role="list">
+          <!-- Classic -->
+          <article class="resume-card" role="listitem" data-category="classic">
+            <div
+              class="surface"
+              tabindex="0"
+              onclick="chooseDesign('/preview/')"
+              onkeydown="cardKey(event,'/preview/')"
+            >
+              <!-- add INSIDE .surface, just before <div class="resume-canvas"> -->
+              <div class="overlay-actions" aria-hidden="true">
+                <button class="btn-preview" type="button">Preview</button>
+                <button class="btn-select" type="button">Select</button>
+              </div>
+
+              <div class="resume-canvas">
+                <img
+                  src="{% static 'resume_images/defaulresume.png' %}"
+                  alt="Classic Resume Layout"
+                  class="resume-img"
+                />
+              </div>
+            </div>
+            <div class="resume-caption">Classic Layout (Default)</div>
+          </article>
+
+          <!-- Modern -->
+          <article class="resume-card" role="listitem" data-category="modern">
+            <div
+              class="surface"
+              tabindex="0"
+              onclick="chooseDesign('/preview2/')"
+              onkeydown="cardKey(event,'/preview2/')"
+            >
+              <!-- add INSIDE .surface, just before <div class="resume-canvas"> -->
+              <div class="overlay-actions" aria-hidden="true">
+                <button class="btn-preview" type="button">Preview</button>
+                <button class="btn-select" type="button">Select</button>
+              </div>
+              <div class="resume-canvas">
+                <img
+                  src="{% static 'resume_images/preview2.png' %}"
+                  alt="Modern Blue-Green Sidebar"
+                  class="resume-img"
+                />
+              </div>
+            </div>
+            <div class="resume-caption">Modern Blue-Green Sidebar</div>
+          </article>
+
+          <!-- Professional -->
+          <article
+            class="resume-card"
+            role="listitem"
+            data-category="professional"
+          >
+            <div
+              class="surface"
+              tabindex="0"
+              onclick="chooseDesign('/preview3/')"
+              onkeydown="cardKey(event,'/preview3/')"
+            >
+              <!-- add INSIDE .surface, just before <div class="resume-canvas"> -->
+              <div class="overlay-actions" aria-hidden="true">
+                <button class="btn-preview" type="button">Preview</button>
+                <button class="btn-select" type="button">Select</button>
+              </div>
+              <div class="resume-canvas">
+                <img
+                  src="{% static 'resume_images/resumeimage.png' %}"
+                  alt="Creative Timeline Layout"
+                  class="resume-img"
+                />
+              </div>
+            </div>
+            <div class="resume-caption">Creative Timeline Layout</div>
+          </article>
+
+          <!-- Modern 2 -->
+          <article class="resume-card" role="listitem" data-category="modern">
+            <div
+              class="surface"
+              tabindex="0"
+              onclick="chooseDesign('/preview4/')"
+              onkeydown="cardKey(event,'/preview4/')"
+            >
+              <!-- add INSIDE .surface, just before <div class="resume-canvas"> -->
+              <div class="overlay-actions" aria-hidden="true">
+                <button class="btn-preview" type="button">Preview</button>
+                <button class="btn-select" type="button">Select</button>
+              </div>
+              <div class="resume-canvas">
+                <img
+                  src="{% static 'resume_images/template4.jpg' %}"
+                  alt="Image Sidebar Template"
+                  class="resume-img"
+                />
+              </div>
+            </div>
+            <div class="resume-caption">Image Sidebar Template</div>
+          </article>
+
+          <!-- Peach -->
+          <article
+            class="resume-card"
+            role="listitem"
+            data-category="professional"
+          >
+            <div
+              class="surface"
+              tabindex="0"
+              onclick="chooseDesign('/preview5/')"
+              onkeydown="cardKey(event,'/preview5/')"
+            >
+              <!-- add INSIDE .surface, just before <div class="resume-canvas"> -->
+              <div class="overlay-actions" aria-hidden="true">
+                <button class="btn-preview" type="button">Preview</button>
+                <button class="btn-select" type="button">Select</button>
+              </div>
+              <div class="resume-canvas">
+                <img
+                  src="{% static 'resume_images/template5.png' %}"
+                  alt="Peach Modern"
+                  class="resume-img"
+                />
+              </div>
+            </div>
+            <div class="resume-caption">Peach Modern Template</div>
+          </article>
+          <!-- Template 6 -->
+
+          <article
+            class="resume-card"
+            role="listitem"
+            data-category="professional"
+          >
+            <div
+              class="surface"
+              tabindex="0"
+              onclick="chooseDesign('/preview6/')"
+              onkeydown="cardKey(event,'/preview6/')"
+            >
+              <!-- add INSIDE .surface, just before <div class="resume-canvas"> -->
+              <div class="overlay-actions" aria-hidden="true">
+                <button class="btn-preview" type="button">Preview</button>
+                <button class="btn-select" type="button">Select</button>
+              </div>
+              <div class="resume-canvas">
+                <img
+                  src="{% static 'resume_images/template6.jpg' %}"
+                  alt="Peach Modern"
+                  class="resume-img"
+                />
+              </div>
+            </div>
+            <div class="resume-caption">Premium Minimalist Resume Template</div>
+          </article>
+        </div>
+      </main>
+
+      <footer>© 2025 Resume Builder</footer>
+    </div>
+
+    <script>
+      // keyboard activation for accessibility
+      function cardKey(e, templateId) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          chooseDesign(templateId);
+        }
+      }
+
+      // Save a simple template id (not a file path) so the editor knows which theme to apply.
+      function chooseDesign(templateId) {
+        // templateId example: 'preview.html' or 'preview2.html' in your old approach.
+        // We store a canonical id so index.html can decide which renderer to use.
+        localStorage.setItem("selectedDesign", templateId);
+        // Open the editor where the user enters details (index.html).
+        // Using _blank (new tab) preserves the gallery page.
+        window.open("/editor/", "_blank");
+      }
+
+      // -----------------------------
+      // FILTERING: show/hide cards
+      // -----------------------------
+      (function setupFilters() {
+        const pills = Array.from(document.querySelectorAll(".pill"));
+        const cards = Array.from(document.querySelectorAll(".resume-card"));
+
+        function applyFilter(category) {
+          category = (category || "all").toLowerCase();
+          cards.forEach((card) => {
+            const cat = (card.dataset.category || "all").toLowerCase();
+            card.style.display =
+              category === "all" || cat === category ? "" : "none";
+          });
+        }
+
+        function setActive(button) {
+          pills.forEach((p) => p.classList.remove("active", "pulse"));
+          if (!button) return;
+          button.classList.add("active", "pulse");
+          setTimeout(() => button.classList.remove("pulse"), 520);
+        }
+
+        pills.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const filter = (btn.dataset.filter || "all").toLowerCase();
+            applyFilter(filter);
+            setActive(btn);
+          });
+
+          btn.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              btn.click();
+            }
+          });
+        });
+
+        const initial =
+          pills.find((p) => p.classList.contains("active")) || pills[0];
+        if (initial) {
+          setActive(initial);
+          applyFilter((initial.dataset.filter || "all").toLowerCase());
+        } else {
+          applyFilter("all");
+        }
+      })();
+      /* ===== minimal preview/select wiring (append this to your existing <script>) ===== */
+      (function addPreviewSelect() {
+        // create modal element (so you don't need to change HTML)
+        const modal = document.createElement("div");
+        modal.id = "previewModal";
+        modal.className = "modal";
+        modal.setAttribute("aria-hidden", "true");
+        modal.innerHTML = `
+    <div class="modal-inner" role="document">
+      <button class="modal-close" aria-label="Close preview">&times;</button>
+      <img class="modal-img" src="" alt="Preview image">
+    </div>
+  `;
+        document.body.appendChild(modal);
+
+        const modalImg = modal.querySelector(".modal-img");
+        const modalClose = modal.querySelector(".modal-close");
+
+        function openPreview(src, alt) {
+          modalImg.src = src;
+          modalImg.alt = alt || "Template preview";
+          modal.classList.add("open");
+          modal.setAttribute("aria-hidden", "false");
+          modalClose.focus();
+        }
+        function closePreview() {
+          modal.classList.remove("open");
+          modal.setAttribute("aria-hidden", "true");
+          modalImg.src = "";
+        }
+
+        modalClose.addEventListener("click", closePreview);
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) closePreview();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && modal.classList.contains("open"))
+            closePreview();
+        });
+
+        // wire up each card (does not override existing onclick handlers)
+        document.querySelectorAll(".resume-card").forEach((card) => {
+          const previewBtn = card.querySelector(".btn-preview");
+          const selectBtn = card.querySelector(".btn-select");
+          const surface = card.querySelector(".surface");
+
+          // Preview button shows modal (uses data-src if present or the img src)
+          previewBtn &&
+            previewBtn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              const src =
+                card.dataset.src || card.querySelector(".resume-img")?.src;
+              const alt = card.querySelector(".resume-img")?.alt || "";
+              if (src) openPreview(src, alt);
+            });
+
+          // Select button triggers existing chooseDesign (keeps your select behavior)
+          selectBtn &&
+            selectBtn.addEventListener("click", (ev) => {
+              ev.stopPropagation();
+              const path = card.dataset.path || ""; // you can add data-path to articles if not present
+              if (path) chooseDesign(path);
+              else {
+                // fallback: simulate clicking the surface (your current chooseDesign might be bound there)
+                surface && surface.click();
+              }
+            });
+
+          // Click on surface (anywhere) should still call existing onclick behavior
+          // (we don't replace it). This is just defensive: if surface has no click handler,
+          // clicking surface will call chooseDesign using data-path attribute.
+          surface &&
+            surface.addEventListener("click", (ev) => {
+              // if click landed on preview/select buttons we already handled above (stopPropagation)
+              // ensure legacy behavior: only run fallback when no existing select path
+              if (!card.dataset.path && ev.target === surface) {
+                ev.stopPropagation();
+                const path = card.dataset.path || "";
+                if (path) chooseDesign(path);
+              }
+            });
+
+          // keyboard: let Enter/Space on preview/select function normally because they are buttons.
+        });
+      })();
+    </script>
+  </body>
+</html>

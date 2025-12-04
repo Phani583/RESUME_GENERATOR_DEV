@@ -1,0 +1,572 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resume — Screenshot Style Template</title>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;700&family=Open+Sans:wght@300;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --accent:#7f7a66; /* warm gray for headings */
+      --muted:#222;
+      --body-bg:#f8f6f1; 
+      --paper:#ffffff;
+      --line:#151515;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--body-bg);font-family:'Open Sans',system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+
+    /* page container mimicking screenshot with subtle border */
+    .page-wrap{
+      max-width:820px;margin:36px auto;padding:28px;background:var(--paper);border:10px solid rgba(0,0,0,0.03);box-shadow:0 8px 22px rgba(0,0,0,0.08);
+    }
+
+    /* header */
+    .cv-header{background:#e9e7e0;padding:26px 28px;border-radius:4px 4px 0 0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+    .name{font-family:'Merriweather',serif;font-weight:700;letter-spacing:2px;font-size:28px;color:var(--accent)}
+    .name b{color:#1b1b1b}
+    .contact{font-size:12px;color:#333;margin-top:8px}
+
+    /* section headings */
+    .section{padding:18px 0}
+    .section + .section{border-top:1px solid var(--line);}
+    .section-title{
+      font-family:'Merriweather',serif;color:var(--accent);font-size:20px;margin:0 0 10px 0;padding-bottom:6px;display:inline-block;position:relative;font-weight:700
+    }
+    .section-title::after{content:'';height:3px;background:var(--line);display:block;width:100%;position:relative;top:10px}
+
+    .profile p{margin:6px 0 0 0;line-height:1.5;color:#222}
+
+    /* Two-column layout for experience blocks */
+    .experience .job{margin:14px 0;padding-right:18px}
+
+
+    .job .meta{font-size:13px;color:#333;margin:4px 0 8px}
+    .job p{margin:0 0 8px;line-height:1.5;color:#333}
+
+    /* education */
+    .edu b {
+  display: block;
+  position: relative;
+  padding-left: 20px; /* space for bullet */
+}
+
+.edu b::before {
+  content: "•";        /* bullet symbol */
+  position: absolute;
+  left: 0;
+  color: var(--accent); /* optional: bullet color to match theme */
+}
+
+    .edu .edu-meta{font-size:13px;color:#333;margin:4px 0}
+
+    /* languages table look */
+    .languages{margin-top:10px}
+    .lang-row{display:flex;justify-content:flex-start;gap:16px;margin:6px 0;font-size:14px}
+    .lang-row .skill{color:#333}
+
+    /* footer small */
+    .small{font-size:12px;color:#666;margin-top:6px}
+
+    /* responsive */
+    @media (max-width:640px){
+      .page-wrap{margin:18px;padding:18px}
+      .name{font-size:22px}
+      .section-title{font-size:18px}
+    }
+  </style>
+</head>1
+<body>
+  <div class="page-wrap" id="previewArea">
+
+    <header class="cv-header">
+      <div class="name"><span id="firstName"></span> <b id="lastName"></b></div>
+      <div class="contact" id="contact"></div>
+    </header>
+
+    <main>
+
+      <section class="section profile">
+  <h2 class="section-title">Professional Summary</h2>
+  <p id="profileSummary"></p>
+</section>
+
+      
+          <section class="section public-links">
+      <h2 class="section-title">Public Links</h2>
+      <ul id="publicLinksList"></ul>
+    </section>
+
+
+      <section class="section experience">
+        <h2 class="section-title">Experience</h2>
+        <div id="experienceContainer"></div>
+      </section>
+
+      <section class="section education">
+        <h2 class="section-title">Education</h2>
+        <div id="educationContainer"></div>
+</section>
+
+       <section class="section skills">
+  <h2 class="section-title">Skills</h2>
+  <ul id="skillsList"></ul>
+</section>
+
+<section class="section projects">
+  <h2 class="section-title">Projects</h2>
+  <div id="projectsContainer"></div>
+</section>
+
+<section class="section certifications">
+  <h2 class="section-title">Certifications</h2>
+  <ul id="certificationsList"></ul>
+</section>
+
+<section class="section internships">
+  <h2 class="section-title">Internships</h2>
+  <div id="internshipsContainer"></div>
+</section>
+
+<section class="section achievements">
+  <h2 class="section-title">Achievements</h2>
+  <ul id="achievementsPreview"></ul>
+</section>
+
+
+<section class="section hobbies">
+  <h2 class="section-title">Hobbies / Interests</h2>
+  <ul id="hobbiesList"></ul>
+</section>
+
+
+
+    <section class="section languages">
+        <h2 class="section-title">Languages</h2>
+        <div class="languages">
+          <div class="lang-row"><div class="lang">English</div><div class="skill">: Native</div></div>
+          <div class="lang-row"><div class="lang">Chinese</div><div class="skill">: Advanced</div></div>
+          <div class="lang-row"><div class="lang">French</div><div class="skill">: Advanced</div></div>
+        </div>
+
+
+        <section class="section additional-info">
+  <h2 class="section-title">Additional Information</h2>
+  <p id="additionalInfo"></p>
+</section>
+
+<section class="section declaration">
+  <h2 class="section-title">Declaration</h2>
+  <p id="declarationText"></p>
+</section>
+
+        
+
+
+
+
+
+
+
+
+
+
+      
+    </main>
+
+  </div>
+
+  <script>
+    
+    
+ 
+
+  // Load saved resume data from localStorage
+
+
+
+  const data = JSON.parse(localStorage.getItem("resumeData") || "{}");
+
+  function safe(el, value) {
+    document.getElementById(el).innerText = value || "";
+  }
+
+   /* ---------------- PERSONAL INFO ---------------- */
+
+/* ---------------- PERSONAL INFO (MATCHED TO FORM) ---------------- */
+
+if (data.personalInfo) {
+
+  // FULL NAME (Your form only has one name field)
+  if (data.personalInfo.fullName) {
+    const parts = data.personalInfo.fullName.trim().split(" ");
+    document.getElementById("firstName").innerText = parts[0] || "";
+    document.getElementById("lastName").innerText = parts.slice(1).join(" ") || "";
+  }
+
+  // LOCATION + CONTACT LINE
+  let contactText = "";
+
+  if (data.personalInfo.location)
+    contactText += data.personalInfo.location;
+
+  if (data.personalInfo.phone)
+    contactText += (contactText ? " — " : "") + data.personalInfo.phone;
+
+  if (data.personalInfo.email)
+    contactText += (contactText ? " — " : "") + data.personalInfo.email;
+
+  document.getElementById("contact").innerText = contactText;
+
+  // SUMMARY
+  if (data.personalInfo.summary) {
+    const summaryEl = document.getElementById("profileSummary");
+    if (summaryEl) summaryEl.innerText = data.personalInfo.summary;
+  }
+}
+
+
+
+
+  /* ---------------- PUBLIC LINKS ---------------- */
+const publicLinksList = document.getElementById("publicLinksList");
+
+if (data.publicLinks) {
+  let linksHTML = "";
+
+  if (data.publicLinks.github)
+  linksHTML += `<li><b>GitHub:</b> <a href="${data.publicLinks.github}" target="_blank">${data.publicLinks.github}</a></li>`;
+
+if (data.publicLinks.linkedin)
+  linksHTML += `<li><b>LinkedIn:</b> <a href="${data.publicLinks.linkedin}" target="_blank">${data.publicLinks.linkedin}</a></li>`;
+
+if (data.publicLinks.portfolio)
+  linksHTML += `<li><b>Portfolio:</b> <a href="${data.publicLinks.portfolio}" target="_blank">${data.publicLinks.portfolio}</a></li>`;
+
+if (data.publicLinks.website)
+  linksHTML += `<li><b>Website:</b> <a href="${data.publicLinks.website}" target="_blank">${data.publicLinks.website}</a></li>`;
+
+  if (Array.isArray(data.publicLinks.custom)) {
+  data.publicLinks.custom.forEach(link => {
+    linksHTML += `<li><b>${link.name}:</b> <a href="${link.url}" target="_blank">${link.url}</a></li>`;
+  });
+}
+
+
+  publicLinksList.innerHTML = linksHTML;
+} else {
+  publicLinksList.innerHTML = "";
+}
+
+
+  /* ---------------- EXPERIENCE (DYNAMIC PREVIEW) ---------------- */
+
+const experienceSection = document.getElementById("experienceSection");
+const experienceContainer = document.getElementById("experienceContainer");
+
+experienceContainer.innerHTML = "";
+
+if (Array.isArray(data.experience) && data.experience.length > 0) {
+
+  experienceContainer.innerHTML = data.experience
+    .map(exp => `
+      <div class="job">
+        <div class="job-head"><b>• ${exp.jobTitle || ""}</b> ${exp.company ? " — " + exp.company : ""}</div>
+        <div class="meta">${exp.startDate || ""} — ${exp.current ? "Present" : (exp.endDate || "")}</div>
+        <p>${exp.description || ""}</p>
+      </div>
+    `)
+    .join("");
+
+} else {
+  experienceSection.style.display = "none"; // HIDE SECTION IF EMPTY
+}
+
+  /* ---------------- EDUCATION ---------------- */
+
+ const educationContainer = document.getElementById("educationContainer");
+educationContainer.innerHTML = ""; // clear previous content
+
+if (Array.isArray(data.education) && data.education.length > 0) {
+    data.education.forEach(edu => {
+        const eduDesc = edu.description || edu.details || edu.relevant || "";
+        const eduScoreLine =
+          edu.score
+            ? `${edu.scoreType ? edu.scoreType + ": " : ""}${edu.score}`
+            : "";
+
+        educationContainer.innerHTML += `
+            <div class="edu">
+                <b>${edu.degree || ""}${edu.institution ? ", " + edu.institution : ""}</b>
+
+                <div class="edu-meta">
+                  ${edu.startDate || ""} — ${edu.current ? "Present" : (edu.endDate || "")}
+                </div>
+
+                <p class="small">
+                  ${eduScoreLine ? eduScoreLine + "<br>" : ""}
+                  ${eduDesc}
+                </p>
+            </div>
+        `;
+    });
+}
+
+
+  /* ---------------- LANGUAGES ---------------- */
+
+  const langDiv = document.querySelector(".languages .languages");
+
+if (Array.isArray(data.languages) && data.languages.length > 0) {
+  langDiv.innerHTML = data.languages
+    .map(
+      (L) =>
+        `<div class="lang-row">
+           <div class="lang"><b>&#9679;</b> ${L.name || ""}</div>
+           <div class="skill">: ${L.level || ""}</div>
+         </div>`
+    )
+    .join("");
+} else {
+  langDiv.innerHTML = "";
+}
+
+
+  /* ---------------- SKILLS ---------------- */
+const skillsList = document.getElementById("skillsList");
+
+if (Array.isArray(data.skills) && data.skills.length > 0) {
+  const validSkills = data.skills.filter(
+    s =>
+      s &&
+      (
+        (typeof s === "string" && s.trim() !== "") ||
+        (typeof s === "object" && (
+          (s.skill && s.skill.trim() !== "") ||
+          (s.name && s.name.trim() !== "") ||
+          (s.category && s.category.trim() !== "") ||
+          (s.level && s.level.trim() !== "")
+        ))
+      )
+  );
+
+  skillsList.innerHTML = validSkills
+    .map(s => {
+      if (typeof s === "string") return `<li>${s}</li>`;
+
+      let category = s.category ? `${s.category} ` : "";
+      
+      let name = s.name ? `${s.name}: ` : "";
+      <!-- let name = s.skill || s.name || ""; -->
+      let level = s.level ? ` — ${s.level}` : "";
+
+      return `<li><b>${name}</b> &nbsp; ${category}  ${level}</li>`;
+
+    })
+    .join("");
+} else {
+  skillsList.innerHTML = "";
+}
+
+
+
+/* ---------------- INTERNSHIPS ---------------- */
+const internshipsContainer = document.getElementById("internshipsContainer");
+
+if (Array.isArray(data.internships) && data.internships.length > 0) {
+  internshipsContainer.innerHTML = data.internships
+    .map(intern => {
+
+      // Internship Name — safe fallbacks
+      const title =
+        intern.internshipName ||
+        intern.internshipTitle ||
+        intern.title ||
+        intern.internship ||
+        intern.name ||
+        "";
+
+      // Organization
+      const company =
+        intern.organization ||
+        intern.company ||
+        "";
+
+      // Make Internship Name bold
+      const boldTitle = title ? `<b>${title}</b>` : "";
+
+      // Formatting with medium bullet point (Unicode ●)
+      const headText =
+        boldTitle
+          ? `&#9679; ${boldTitle}${company ? ", " + company : ""}`
+          : company ? `&#9679; ${company}` : "";
+
+      const datePart = `${intern.startDate || ""} — ${
+        intern.current ? "Present" : (intern.endDate || "")
+      }`;
+
+      return `
+        <div class="job">
+          <div class="job-head">${headText}</div>
+          <div class="meta">${datePart}</div>
+          <p>${intern.description || ""}</p>
+        </div>
+      `;
+    })
+    .join("");
+} else {
+  internshipsContainer.innerHTML = "";
+}
+
+/* ---------------- PROJECTS ---------------- */
+const projectsContainer = document.getElementById("projectsContainer");
+
+if (Array.isArray(data.projects) && data.projects.length > 0) {
+  projectsContainer.innerHTML = data.projects
+    .map(proj => {
+      // Use multiple key options for flexibility
+      const name = proj.projectName || proj.name || "";
+      const description = proj.projectDescription || proj.description || "";
+      const start = proj.projectStart || proj.startDate || "";
+      const end = proj.projectEnd || proj.endDate || "";
+
+      // 🔥 FIXED: Added proj.projectUrl
+      const url = proj.projectURL || proj.projectUrl || proj.url || "";
+
+      const urlPart =
+        url.trim() !== ""
+          ? `<div class="meta"><b>URL:</b> <a href="${url}" target="_blank">${url}</a></div>`
+          : "";
+
+      const yearPart =
+        (start || end)
+          ? `<div class="meta">${start} — ${end}</div>`
+          : "";
+
+      return `
+        <div class="job">
+          <div class="job-head"><b>• ${name}</b></div>
+          ${yearPart}
+          ${urlPart}
+          <p>${description}</p>
+        </div>
+      `;
+    })
+    .join("");
+} else {
+  projectsContainer.innerHTML = "";
+}
+
+
+
+/* ---------------- CERTIFICATIONS ---------------- */
+
+const certificationsList = document.getElementById("certificationsList");
+
+if (Array.isArray(data.certifications) && data.certifications.length > 0) {
+  
+  // Filter out empty items
+  const validCerts = data.certifications.filter(cert =>
+    cert.name && cert.name.trim() !== ""
+  );
+
+  certificationsList.innerHTML = validCerts
+    .map(cert => {
+      let html = `<li style="margin-bottom:10px;">`;
+
+      // Certificate Name
+      html += `<b>${cert.name}</b>`;
+
+      // Issuing Organization
+      if (cert.issuer && cert.issuer.trim() !== "")
+        html += ` — ${cert.issuer}`;
+
+      // Date or Year
+      if (cert.date && cert.date.trim() !== "")
+        html += ` (${cert.date})`;
+
+      // Certificate ID
+      if (cert.id && cert.id.trim() !== "")
+        html += `<br><small>ID: ${cert.id}</small>`;
+
+      // Certificate URL
+      if (cert.url && cert.url.trim() !== "")
+        html += `<br><small>Link: ${cert.url}</small>`;
+
+        // Description
+      if (cert.description && cert.description.trim() !== "")
+        html += `<br><small>${cert.description}</small>`;
+
+      html += `</li>`;
+      return html;
+    })
+    .join("");
+
+} else {
+  certificationsList.innerHTML = "";
+}
+
+
+
+/* ---------- ACHIEVEMENTS (Preview Only) ---------- */
+const achievementsPreview = document.getElementById("achievementsPreview");
+
+if (Array.isArray(data.achievements) && data.achievements.length > 0) {
+    const validAchievements = data.achievements.filter(a =>
+        a && ((typeof a === "string" && a.trim() !== "") || (a.achievement && a.achievement.trim() !== ""))
+    );
+
+    achievementsPreview.innerHTML = validAchievements
+      .map(a => `<li>${typeof a === "string" ? a : a.achievement}</li>`)
+      .join("");
+} else {
+    achievementsPreview.innerHTML = "";
+}
+
+
+
+
+
+/* ---------------- HOBBIES ---------------- */
+const hobbiesList = document.getElementById("hobbiesList");
+
+if (Array.isArray(data.hobbies) && data.hobbies.length > 0) {
+  const validHobbies = data.hobbies.filter(
+    h => h && ((typeof h === "string" && h.trim() !== "") || (h.hobby && h.hobby.trim() !== ""))
+  );
+
+  hobbiesList.innerHTML = validHobbies
+    .map(h => `<li>${typeof h === "string" ? h : h.hobby}</li>`)
+    .join("");
+} else {
+  hobbiesList.innerHTML = "";
+}
+
+ /* ---------------- ADDITIONAL INFORMATION ---------------- */
+const additionalInfo = document.getElementById("additionalInfo");
+if (data.additionalInfo && data.additionalInfo.trim() !== "") {
+  additionalInfo.innerText = data.additionalInfo;
+} else {
+  additionalInfo.innerText = "";
+}
+
+/* ---------------- DECLARATION ---------------- */
+const declarationText = document.getElementById("declarationText");
+if (data.declaration && data.declaration.trim() !== "") {
+  declarationText.innerText = data.declaration;
+} else {
+  declarationText.innerText = "";
+}
+
+
+
+
+
+
+
+
+
+  </script>
+</body>
+</html>

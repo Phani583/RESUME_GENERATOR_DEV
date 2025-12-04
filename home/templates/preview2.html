@@ -1,0 +1,774 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Resume Preview 2 – Modern Blue-Green</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+      .actions {
+        margin: 20px auto;
+        text-align: center;
+      }
+      .actions button {
+        margin: 0 6px;
+        padding: 10px 14px;
+      }
+      @media print {
+        .actions,
+        #fontSizeControls {
+          display: none !important;
+        }
+        body {
+          background: #fff;
+          margin: 0;
+          padding: 0;
+        }
+        @page {
+          size: A4;
+          margin: 6mm 0mm 6mm 2mm; /* Top Right Bottom Left */
+        }
+
+        .preview-page,
+        .container {
+          page-break-after: always;
+          padding: 30mm 25mm 30mm 25mm; /*Adjust here for more margin */
+          box-sizing: border-box;
+        }
+
+        /* Optional: ensure each card doesn't get split awkwardly */
+        .card {
+          page-break-inside: avoid;
+        }
+        /* 6️⃣ Customize first vs remaining pages */
+        @page :first {
+          margin: 6mm 0mm 6mm 2mm; /* smaller for first page */
+        }
+
+        @page {
+          margin: 6mm 0mm 6mm 2mm;
+          /* margin: 20mm 40mm 18mm 1mm; /* larger for 2nd+ pages */
+        }
+      }
+      /* Main layout */
+      .resume-wrapper {
+        display: flex;
+        align-items: stretch;
+        max-width: 1100px;
+        margin: 30px auto;
+        padding-left: 0px;
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Sidebar (photo, name, links) */
+      .sidebar {
+        width: 280px;
+        background: linear-gradient(180deg, #007bff, #20c997);
+        color: white;
+        padding: 8px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        justify-content: flex-start;
+      }
+
+      .sidebar img {
+        width: clamp(80px, 10vw, 120px);
+        height: clamp(80px, 10vw, 120px);
+        border-radius: 50%;
+        border: 3px solid white;
+        object-fit: cover;
+        margin-bottom: 12px;
+      }
+
+      .sidebar h1 {
+        margin-bottom: 30px;
+        font-size: 22px;
+        text-align: center;
+      }
+
+      .sidebar .links {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .sidebar .links a,
+      .sidebar .links p {
+        color: #e3f8ff;
+        text-decoration: none;
+        font-size: 16px;
+        margin: 8px 0;
+        word-wrap: break-word;
+      }
+
+      /* Resume content area (right side) */
+      .resume-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #f9fafc;
+      }
+
+      .navbar {
+        background: #f0f4f8;
+        padding: 15px 25px;
+        border-bottom: 2px solid #20c997;
+      }
+
+      .content-body {
+        padding: 0px 10px;
+        color: #333;
+      }
+
+      /* Responsive behavior */
+      @media (max-width: 768px) {
+        .resume-wrapper {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          padding: 2px 2px;
+        }
+
+        .content-body {
+          padding: 0px 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Font Size Toolbar -->
+    <!-- <div id="topControls">
+      <div id="fontSizeControls">
+        <label for="fontSizeRange" style="font-size: 14px">Font Size:</label>
+        <input type="range" id="fontSizeRange" min="12" max="24" value="16" />
+        <span id="fontSizeValue" style="font-size: 14px">16px</span>
+      </div>
+
+      <div class="actions">
+        <button onclick="downloadPDF()">Download PDF</button>
+        <button onclick="downloadTxt()">Download TXT</button>
+      </div>
+    </div> -->
+    <div
+      id="fontSizeControls"
+      style="
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 12px 14px;
+        background: #f8f8f8;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <label for="fontSizeRange" style="font-size: 15px">Font Size:</label>
+      <input
+        type="range"
+        id="fontSizeRange"
+        min="12"
+        max="24"
+        value="16"
+        step="1"
+      />
+      <span id="fontSizeValue" style="font-size: 14px">16px</span>
+    </div>
+    <div class="actions">
+      <button onclick="downloadPDF()">Download PDF</button>
+    </div>
+
+    <div id="resumeContainer"></div>
+
+    <script>
+      const data = JSON.parse(localStorage.getItem("resumeData") || "{}");
+
+      function safe(s = "") {
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;",
+            }[c])
+        );
+      }
+
+      function ensureUrl(url) {
+        if (!url) return "";
+        url = String(url).trim();
+        return /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(url) ? url : "https://" + url;
+      }
+
+      const pi = data.personalInfo || {};
+      const pl = data.publicLinks || {};
+      const contactParts = [];
+
+      if (pi.email)
+        contactParts.push(`<a href="mailto:${pi.email}">${safe(pi.email)}</a>`);
+      if (pi.phone) contactParts.push(`<p>${safe(pi.phone)}</p>`);
+      if (pi.location) contactParts.push(`<p>${safe(pi.location)}</p>`);
+
+      ["github", "linkedin", "portfolio", "website"].forEach((k) => {
+        const v = pl[k];
+        if (v)
+          contactParts.push(
+            `<a href="${ensureUrl(v)}" target="_blank">${safe(k)}</a>`
+          );
+      });
+
+      const container = document.getElementById("resumeContainer");
+
+      container.innerHTML = `
+      <div class="resume-wrapper">
+        <div class="sidebar">
+          ${
+            pi.profilePhoto
+              ? `<img src="${pi.profilePhoto}" alt="Profile Photo" />`
+              : ""
+          }
+          <h1>${safe(pi.fullName || "")}</h1>
+          <div class="links">${contactParts.join("")}</div>
+        </div>
+
+        <div class="resume-content">
+          <div class="content-body"></div>
+        </div>
+      </div>
+    `;
+
+      const content = document.querySelector(".content-body");
+
+      function addSection(title, html) {
+        // Add section only if html contains visible content (not just whitespace or empty tags)
+        if (html && html.replace(/<[^>]+>/g, "").trim() !== "") {
+          content.innerHTML += `<h2>${title}</h2>${html}`;
+        }
+      }
+
+      if (pi.summary)
+        addSection("Professional Summary", `<p>${safe(pi.summary)}</p>`);
+
+      // ===== Education Section =====
+      if (Array.isArray(data.education)) {
+        const html = data.education
+          .map((e) => {
+            const degree = safe(e.degree || "");
+            const institution = safe(e.institution || "");
+            const start = safe(e.startDate || "");
+            const end = safe(e.endDate || "Present");
+
+            const score = e.score ? ` | Score: ${safe(e.score)}` : "";
+            const type = e.type ? ` | ${safe(e.type)}` : "";
+
+            const description = e.description
+              ? `<p style="margin:4px 0 10px 0;">${safe(e.description)}</p>`
+              : "";
+
+            return `
+        <div style="margin-bottom:10px;">
+          <p style="margin:0; font-weight:600;">
+            ${degree} - ${institution} - ${score}${type}
+            <span style="float:right; color:#555; font-size:14px;">
+              ${start} - ${end}
+            </span>
+          </p>
+          ${description}
+        </div>
+      `;
+          })
+          .join("");
+
+        addSection("Education", html);
+      }
+
+      if (Array.isArray(data.experience)) {
+        const html = data.experience
+          .map(
+            (e) => `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+      <p style="margin:0; font-weight:600;">
+        ${safe(e.jobTitle || "")} at ${safe(e.company || "")}
+      </p>
+      <p style="margin:0; font-size:14px; color:#555;">
+        ${safe(e.startDate || "")} - ${safe(e.endDate || "Present")}
+      </p>
+    </div>
+    ${
+      e.description
+        ? `<p style="margin:4px 0 12px 0;">${safe(e.description)}</p>`
+        : ""
+    }
+    `
+          )
+          .join("");
+
+        addSection("Experience", html);
+      }
+
+      // ===== Internships Section =====
+      if (Array.isArray(data.internships)) {
+        const html = data.internships
+          .map((i) => {
+            const name = safe(i.name || i.internshipName || "");
+            const org = i.organization ? ` - ${safe(i.organization)}` : "";
+            const dateRange =
+              i.startDate || i.endDate
+                ? ` <span style="float:right; color:#555; font-size:14px;">${safe(
+                    i.startDate || ""
+                  )} - ${safe(i.endDate || "Present")}</span>`
+                : "";
+
+            const description = i.description
+              ? `<p style="margin:4px 0 10px 0;">${safe(i.description)}</p>`
+              : "";
+
+            return `
+        <div style="overflow:hidden; margin-bottom:10px;">
+          <p style="margin:0; font-weight:600; font-size:15px;">
+            ${name}${org}${dateRange}
+          </p>
+          ${description}
+        </div>
+      `;
+          })
+          .join("");
+
+        addSection("Internships", html);
+      }
+
+      if (Array.isArray(data.projects)) {
+        const html = data.projects
+          .map((p) => {
+            const name = safe(p.name || "");
+            const link = p.projectUrl
+              ? ` - <a href="${ensureUrl(p.projectUrl)}" target="_blank">${safe(
+                  p.projectUrl
+                )}</a>`
+              : "";
+            const duration =
+              p.startDate || p.endDate
+                ? `<span style="float:right; color:#555; font-size:14px;">${safe(
+                    p.startDate || ""
+                  )} - ${safe(p.endDate || "Present")}</span>`
+                : "";
+            const description = p.description
+              ? `<p style="margin:4px 0 10px 0;">${safe(p.description)}</p>`
+              : "";
+
+            return `
+          <div style="overflow:hidden; margin-bottom:8px;">
+            <p style="margin:0; font-weight:600;">
+              ${name}${link}${duration}
+            </p>
+            ${description}
+          </div>
+        `;
+          })
+          .join("");
+
+        addSection("Projects", html);
+      }
+
+      // ===== Certifications Section =====
+      if (Array.isArray(data.certifications)) {
+        const html = data.certifications
+          .map((c) => {
+            const name = safe(c.name || "");
+            const issuer = c.issuer ? ` - ${safe(c.issuer)}` : "";
+            const date = c.date ? `  ${safe(c.date)}` : "";
+
+            // Show full URL directly
+            const urlValue =
+              c.certificateUrl || c.certificateURL || c.url || c.link || "";
+
+            const url = urlValue
+              ? ` - <a href="${safe(
+                  urlValue
+                )}" target="_blank" style="color:#0066cc;">${safe(
+                  urlValue
+                )}</a>`
+              : "";
+
+            const description = c.description
+              ? `<p style="margin:4px 0 10px 0;">${safe(c.description)}</p>`
+              : "";
+
+            return `
+        <div style="overflow:hidden; margin-bottom:10px;">
+          <p style="margin:0; font-weight:600; font-size:15px;">
+            ${name}${issuer}${url}
+            <span style="float:right; color:#555; font-size:14px;">
+              ${date}
+            </span>
+          </p>
+          ${description}
+        </div>
+      `;
+          })
+          .join("");
+
+        addSection("Certifications", html);
+      }
+
+      if (Array.isArray(data.skills)) {
+        const html = data.skills
+          .map((s) => {
+            const name = safe(s.name || "");
+            const level = s.level ? ` <em>(${safe(s.level)})</em>` : "";
+            const description = s.description
+              ? `<p style="margin:4px 0 10px 20px; font-size:14px; color:#555;">${safe(
+                  s.description
+                )}</p>`
+              : "";
+            return `<li style="margin-bottom:6px;margin-left:10px"><strong>${name}</strong>${level}</li>${description}`;
+          })
+          .join("");
+        addSection("Skills", html);
+      }
+
+      if (Array.isArray(data.languages)) {
+        const html = `${data.languages
+          .map(
+            (l) =>
+              `<li style="margin-bottom:6px;margin-left:10px">${safe(
+                l.name || ""
+              )}</li>`
+          )
+          .join("")}`;
+        addSection("Languages", html);
+      }
+
+      if (Array.isArray(data.hobbies)) {
+        const html = `${data.hobbies
+          .map(
+            (h) =>
+              `<li style="margin-bottom:6px;margin-left:10px">${safe(
+                h.hobby || ""
+              )}</li>`
+          )
+          .join("")}`;
+        addSection("Hobbies", html);
+      }
+
+      // ===== Achievements Section =====
+      // --- FIX for [object Object] issue ---
+      if (data.achievements) {
+        // Convert object {ach1: "...", ach2: "..."} → array
+        if (!Array.isArray(data.achievements)) {
+          data.achievements = Object.values(data.achievements);
+        }
+
+        // Convert [{text:"x"}, {text:"y"}] → ["x","y"]
+        data.achievements = data.achievements.map((a) => {
+          if (typeof a === "object" && a !== null) {
+            return a.text || a.value || Object.values(a)[0];
+          }
+          return a; // already a string
+        });
+      }
+
+      if (Array.isArray(data.achievements)) {
+        const html = data.achievements
+          .map(
+            (a) =>
+              `<li style="margin-bottom:6px; margin-left:10px;">${safe(a)}</li>`
+          )
+          .join("");
+        addSection("Achievements", html);
+      }
+
+      if (data.additionalInfo)
+        addSection(
+          "Additional Information",
+          `<p>${safe(data.additionalInfo)}</p>`
+        );
+      if (data.declaration)
+        addSection("Declaration", `<p>${safe(data.declaration)}</p>`);
+
+      // Hide controls during print
+      function downloadPDF() {
+        window.print(); // sidebar and content stay as in preview
+      }
+
+      // Font Size Control
+      document.addEventListener("input", (e) => {
+        if (e.target.id === "fontSizeRange") {
+          const size = e.target.value + "px";
+          document.querySelector(".resume-wrapper").style.fontSize = size;
+          document.getElementById("fontSizeValue").textContent = size;
+          localStorage.setItem("preview2FontSize", size);
+        }
+      });
+
+      (function applySavedFontSize() {
+        const saved = localStorage.getItem("preview2FontSize");
+        const range = document.getElementById("fontSizeRange");
+        const value = document.getElementById("fontSizeValue");
+        if (saved) {
+          document.querySelector(".resume-wrapper").style.fontSize = saved;
+          range.value = parseInt(saved);
+          value.textContent = saved;
+        }
+      })();
+
+      function downloadPDF() {
+        const element = document.querySelector(".resume-wrapper");
+
+        const opt = {
+          margin: 0,
+          filename: "Resume.pdf",
+          image: { type: "jpeg", quality: 1 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        };
+
+        html2pdf().set(opt).from(element).save();
+      }
+    </script>
+
+    <style>
+      /* Top controls bar */
+      #topControls {
+        position: fixed;
+        top: 15px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        padding: 10px 15px;
+        display: flex;
+        flex-wrap: wrap; /* allow items to wrap */
+        align-items: center;
+        gap: 10px;
+        z-index: 9999;
+        font-family: Arial, sans-serif;
+        width: auto;
+        max-width: 90%;
+        box-sizing: border-box;
+      }
+
+      /* Medium screens 601px–1024px */
+      @media (max-width: 1024px) and (min-width: 601px) {
+        #topControls {
+          max-width: 80%;
+          right: 10px;
+          gap: 8px;
+        }
+      }
+
+      /* Mobile screens ≤600px */
+      @media (max-width: 600px) {
+        #topControls {
+          flex-direction: column;
+          width: 90%;
+          max-width: 90%;
+          right: 10px;
+          top: 10px;
+          gap: 8px;
+        }
+
+        #fontSizeRange {
+          width: 100%;
+        }
+
+        .actions {
+          width: 100%;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+          justify-content: flex-start;
+        }
+      }
+
+      /* Add a spacer div equal to the topControls height */
+      #topSpacer {
+        height: calc(60px + 15px); /* approx toolbar height + top offset */
+      }
+
+      /* Main resume wrapper */
+      @media (max-width: 1024px) and (min-width: 769px) {
+        .resume-wrapper {
+          flex-direction: row;
+          align-items: stretch; /* maintain full height layout */
+        }
+
+        .sidebar {
+          width: 220px;
+          padding: 2px 10px;
+          flex-shrink: 0;
+          justify-content: flex-start;
+        }
+
+        .sidebar img {
+          width: 90px;
+          height: 90px;
+        }
+
+        .sidebar h1 {
+          font-size: 16px;
+        }
+
+        .sidebar .links a,
+        .sidebar .links p {
+          font-size: 14px;
+        }
+
+        .content-body {
+          padding: 0px 10px;
+        }
+      }
+
+      /* Resume content */
+      .resume-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #f9fafc;
+      }
+
+      .content-body {
+        padding: 0px 10px;
+        color: #333;
+      }
+
+      /* Font size and buttons */
+      #fontSizeControls input[type="range"] {
+        width: 120px;
+        accent-color: #007bff;
+      }
+
+      #fontSizeRange {
+        width: 100px;
+        accent-color: #007bff;
+        cursor: pointer;
+      }
+
+      /* Medium screens — normalize window size */
+      @media (max-width: 1024px) and (min-width: 769px) {
+        .resume-wrapper {
+          flex-direction: row; /* keep sidebar beside content */
+        }
+
+        .sidebar {
+          width: 220px;
+          padding: 4px 15px;
+          flex-shrink: 0;
+          justify-content: flex-start;
+        }
+
+        .sidebar img {
+          width: clamp(70px, 9vw, 120px);
+          height: clamp(70px, 9vw, 120px);
+        }
+
+        .sidebar h1 {
+          font-size: 18px;
+          padding: 6px 0px;
+        }
+
+        .sidebar .links a,
+        .sidebar .links p {
+          font-size: 16px;
+          padding: 5px 0px;
+        }
+
+        .content-body {
+          padding: 0px 10px;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 500px) {
+        .resume-wrapper {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          padding: 2px 2px;
+        }
+
+        .content-body {
+          padding: 0px 10px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        #topControls {
+          flex-direction: column;
+          right: 10px;
+          top: 10px;
+          gap: 10px;
+          width: auto;
+          max-width: 90%;
+        }
+
+        #fontSizeRange {
+          width: 80px;
+        }
+
+        #topSpacer {
+          height: 120px; /* increased space for stacked controls */
+        }
+      }
+
+      /* Print */
+      @media print {
+        #topControls {
+          display: none !important;
+        }
+        body {
+          background: white !important;
+          margin: 0;
+        }
+        .resume-wrapper {
+          display: flex !important;
+          flex-direction: row !important;
+          margin: 0 auto !important;
+          box-shadow: none !important;
+          width: 100% !important;
+          max-width: none !important;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+        .sidebar {
+          width: 180px !important;
+          flex-shrink: 0;
+        }
+        .resume-content {
+          flex: 1 !important;
+        }
+        .resume-wrapper,
+        .resume-wrapper * {
+          font-size: inherit !important;
+        }
+      }
+      /* FIX: Keep sidebar gradient color in print */
+      @media print {
+        .sidebar {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          background: linear-gradient(180deg, #007bff, #20c997) !important;
+        }
+        .content {
+          margin-left: 300px !important; /* Keep main content aligned */
+        }
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,349 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Resume Builder (Single Form)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  </head>
+  <body>
+    
+  <div class="app-layout"> <!-- START layout wrapper -->
+
+    <!-- Sidebar & Navigation ---->
+    <aside class="sidebar">
+      <h2 class="logo">Resume Builder</h2>
+      <nav class="nav-menu">
+        <a href="#step-1" class="nav-item active" id="step-1">
+          <span class="icon">👤</span>
+          <span class="label">Personal Info</span>
+        </a>
+        <a href="#step-2" class="nav-item">
+          <span class="icon">🔗</span>
+          <span class="label">Public Links</span>
+        </a>
+        <a href="#step-3" class="nav-item">
+          <span class="icon">💼</span>
+          <span class="label">Experience</span>
+        </a>
+        <a href="#step-4" class="nav-item">
+          <span class="icon">🎓</span>
+          <span class="label">Education</span>
+        </a>
+        <a href="#step-5" class="nav-item">
+          <span class="icon">🛠️</span>
+          <span class="label">Skills</span>
+        </a>
+        <a href="#step-6" class="nav-item">
+          <span class="icon">📂</span>
+          <span class="label">Projects</span>
+        </a>
+        <a href="#step-7" class="nav-item">
+          <span class="icon">📜</span>
+          <span class="label">Certificates</span>
+        </a>
+        <a href="#step-8" class="nav-item">
+          <span class="icon">🏢</span>
+          <span class="label">Internships</span>
+        </a>
+        <a href="#step-9" class="nav-item">
+  <span class="icon">🏆</span>
+  <span class="label">Achievements</span>
+</a>
+
+        <a href="#step-9" class="nav-item">
+          <span class="icon">🎨</span>
+          <span class="label">Hobbies</span>
+        </a>
+        <a href="#step-10" class="nav-item">
+          <span class="icon">🗣️</span>
+          <span class="label">Languages</span>
+        </a>
+        <a href="#step-11" class="nav-item">
+          <span class="icon">📝</span>
+          <span class="label">Additional Info</span>
+        </a>
+        <a href="#step-12" class="nav-item">
+          <span class="icon">✔️</span>
+          <span class="label">Declaration</span>
+        </a>
+      </nav>
+      
+      <!-- Progress Bar (Sidebar Bottom) -->
+<div class="progress-wrapper">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 0%;">
+      0%
+    </div>
+  </div>
+</div>
+
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+       
+
+      
+      <!-- Keep your existing header and main content here -->
+
+    <header class="app-header">
+      
+      <h1>Resume Builder</h1>
+      <div class="actions">
+        <button type="button" class="btn" id="btn-save">Save</button>
+        <button type="button" class="btn btn-secondary" id="btn-clear">
+          Clear
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-preview">
+          Preview
+        </button>
+      </div>
+    </header>
+
+    
+    <main class="container">
+      <!-- ===== Personal Info ===== -->
+      <section class="card wizard-step" id="step-1" data-step="1">
+        <div class="card-header">
+          <h2>Personal Information</h2>
+        </div>
+        <div class="card-body grid-2" id="card-body">
+          <label
+            >Full Name* <input class="input" id="fullName" required
+          /></label>
+
+          <label
+            >Email* <input class="input" id="email" type="email" required
+          /></label>
+          <label
+            >Phone* <input class="input" id="phone" type="tel" required
+          /></label>
+          <label>Location <input class="input" id="location" /></label>
+          <label
+            >Profile Photo
+            <input class="input" id="profilePhoto" type="file" accept="image/*"
+          /></label>
+
+          <label class="full"
+            >Professional Summary*
+            <textarea
+              class="textarea"
+              id="summary"
+              rows="4"
+              required
+            ></textarea>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===== Public Links (NEW: static + dynamic) ===== -->
+      <section class="card wizard-step" id="step-2" data-step="2">
+        <div class="card-header between">
+          <h2>Public Links</h2>
+          <button type="button" class="btn btn-small" id="addCustomLink">
+            + Add Link
+          </button>
+        </div>
+        <div class="card-body grid-2">
+          <label
+            >GitHub
+            <input
+              class="input"
+              id="github"
+              type="url"
+              placeholder="https://github.com/username"
+            />
+          </label>
+          <label
+            >LinkedIn
+            <input
+              class="input"
+              id="linkedin"
+              type="url"
+              placeholder="https://linkedin.com/in/..."
+            />
+          </label>
+          <label
+            >Portfolio
+            <input class="input" id="portfolio" type="url" />
+          </label>
+          <label
+            >Website
+            <input class="input" id="website" type="url" />
+          </label>
+        </div>
+        <!-- dynamic custom links -->
+        <div class="card-body" id="customLinksList"></div>
+      </section>
+
+      <!-- ===== Experience ===== -->
+      <section class="card wizard-step" id="step-3" data-step="3">
+        <div class="card-header between">
+          <h2>Work Experience</h2>
+          <button type="button" class="btn btn-small" id="addExperience">
+            + Add Experience
+          </button>
+        </div>
+        <div class="card-body" id="experienceList"></div>
+      </section>
+
+      <!-- ===== Education ===== -->
+      <section class="card wizard-step" id="step-4" data-step="4">
+        <div class="card-header between">
+          <h2>Education</h2>
+          <button type="button" class="btn btn-small" id="addEducation">
+            + Add Education
+          </button>
+        </div>
+        <div class="card-body" id="educationList"></div>
+      </section>
+
+      <!-- ===== Skills ===== -->
+      <section class="card wizard-step" id="step-5" data-step="5">
+        <div class="card-header between">
+          <h2>Skills</h2>
+          <button type="button" class="btn btn-small" id="addSkill">
+            + Add Skill
+          </button>
+        </div>
+        <div class="card-body" id="skillsList"></div>
+      </section>
+
+      <!-- ===== Projects ===== -->
+      <section class="card wizard-step" id="step-6" data-step="6">
+        <div class="card-header between">
+          <h2>Projects</h2>
+          <button type="button" class="btn btn-small" id="addProject">
+            + Add Project
+          </button>
+        </div>
+        <div class="card-body" id="projectsList"></div>
+      </section>
+      <!-- ===== Certificates ===== -->
+      <section class="card wizard-step" id="step-7" data-step="7">
+        <div class="card-header between">
+          <h2>Certifications</h2>
+          <button type="button" class="btn btn-small" id="addCertification">
+            + Add Certificate
+          </button>
+        </div>
+        <div class="card-body" id="certificationsList"></div>
+      </section>
+      <!-- ===== Internship ===== -->
+      <section class="card wizard-step" id="step-8" data-step="8">
+        <div class="card-header between">
+          <h2>Internships</h2>
+          <button type="button" class="btn btn-small" id="addInternship">
+            + Add Internship
+          </button>
+        </div>
+        <div class="card-body" id="internshipsList"></div>
+      </section>
+            </section> <!-- make sure Internship section closes here -->
+            <!-- ===== Achievements (NEW) ===== -->
+<section class="card wizard-step" id="step-9" data-step="9">
+  <div class="card-header between">
+    <h2>Achievements</h2>
+    <button type="button" class="btn btn-small" id="addAchievement">
+      + Add Achievement
+    </button>
+  </div>
+  <div class="card-body" id="achievementsList"></div>
+</section>
+
+      <!-- ===== Hobbies (NEW) ===== -->
+      <section class="card wizard-step" id="step-10" data-step="10">
+        <div class="card-header between">
+          <h2>Hobbies</h2>
+          <button type="button" class="btn btn-small" id="addHobby">
+            + Add Hobby
+          </button>
+        </div>
+        <div class="card-body" id="hobbiesList"></div>
+      </section>
+      <!-- ===== Languages (NEW) ===== -->
+      <section class="card wizard-step" id="step-11" data-step="11">
+        <div class="card-header between">
+          <h2>Languages</h2>
+          <button type="button" class="btn btn-small" id="addLanguage">
+            + Add Language
+          </button>
+        </div>
+        <div class="card-body" id="languagesList"></div>
+      </section>
+
+      <!-- ===== Additional Information (NEW) ===== -->
+      <section class="card wizard-step" id="step-12" data-step="12">
+        <div class="card-header">
+          <h2>Additional Information</h2>
+        </div>
+        <div class="card-body">
+          <label class="full">
+            <textarea
+              class="textarea"
+              id="additionalInfo"
+              rows="4"
+              placeholder="Enter any additional details such as achievements, references, or notes..."
+            ></textarea>
+          </label>
+        </div>
+      </section>
+
+      <!-- ===== Declaration Section ===== -->
+<section class="card wizard-step" id="step-13" data-step="13">
+  <div class="card-header between">
+    <h2>Declaration</h2>
+    <button type="button" class="btn btn-small" id="toggleDeclaration">
+      + Add Declaration
+    </button>
+  </div>
+ 
+  <!-- Hidden by default -->
+  <div class="card-body" id="declarationContainer" style="display: none;">
+    <label class="full">
+      <textarea
+        id="declaration"
+        class="textarea full"
+        placeholder="Write your declaration here..."
+        rows="4"
+      ></textarea>
+    </label>
+  </div>
+</section>
+
+      
+
+      <!--  ===== Wizard Navigation ===== -->
+      <div class="wizard-navigation" 
+     style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+  <button type="button" class="btn" id="prevStep" style="display: none">
+    Previous
+  </button>
+  <button type="button" class="btn btn-primary" id="nextStep">
+    Next
+  </button>
+</div>
+
+    <!-- <button type="button" onclick="openPreview()">Preview Resume</button>
+
+<script>
+  function openPreview() {
+    // Get the selected preview design from localStorage
+    const selectedDesign = localStorage.getItem("selectedDesign") || "preview.html";
+
+    // Redirect to that preview page
+    window.location.href = selectedDesign;
+  }
+</script> -->
+
+    <script src="{% static 'js/script.js' %}"></script>
+    
+
+
+
+
+  </body>
+</html>
