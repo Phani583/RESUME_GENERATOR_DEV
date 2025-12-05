@@ -24,3 +24,6 @@ def preview_5(request):
 
 def preview_6(request):
     return render(request, 'preview6.html')
+
+def rb_login(request):
+    return render(request, 'rb_login.html')
