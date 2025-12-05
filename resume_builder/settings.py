@@ -78,7 +78,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'resume_db',
         'USER': 'root',
-        'PASSWORD': 'Mr-tech@2002',
+        'PASSWORD': 'Phani@1210',
         'HOST': 'localhost',
         'PORT': '3306',
     }
