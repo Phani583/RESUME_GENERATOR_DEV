@@ -1,10 +1,23 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Template 5 Resume</title>
 <style>
+    /* PDF second page and above → push content down */
+/* FORCE TOP MARGIN FOR ALL PDF PAGES EXCEPT FIRST */
+@media print {
+    .html2pdf__page-break + * {
+        margin-top: 70px !important;   /* top gap */
+        padding-top: 20px !important;  /* inside spacing */
+    }
+}
+
+.pdf-page + .pdf-page {
+    margin-top: 80px !important;
+    padding-top: 40px !important;
+}
+
 /* ===== GLOBAL STYLES ===== */
 html, body {
     margin: 0;
@@ -12,7 +25,7 @@ html, body {
     width: 100%;
     height: 100%;
     font-family: "Poppins", Arial, sans-serif;
-    background: #fdeeee !important; /* FULL PAGE BACKGROUND */
+   background: #fdeeee !important; /* FULL PAGE BACKGROUND */
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     word-break: break-word;
@@ -21,25 +34,26 @@ html, body {
 
 /* ===== PAGE WRAPPER (A4 PRECISE) ===== */
 .page-wrapper {
-    width: 794px;               /* A4 width */
-    min-height: 1123px;         /* A4 height */
-    margin: 20px auto;          /* perfect top & bottom margin */
-    background: #fdeeee !important;
+    background: #ffffff !important;
+    width: 794px;
+    min-height: 1123px;
+    margin: 40px auto;       /* nice gap top & bottom */
     padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    box-shadow: 0 0 20px rgba(0,0,0,0.10); /* soft shadow like screenshot */
+    border-radius: 6px;
 }
 
 /* ===== INNER CONTENT (PDF PAGE) ===== */
 .resume-container {
     display: flex;
     width: 100%;
-    gap: 20px;          /* space between left & right panel */
+    justify-content: center; /* Center the left + right panels */
+    gap: 20px;               /* space between left & right panel */
 }
+
 .left {
     width: 32%;
-    background: #f8c6cc;
+    background: #f8c6cc !important;
     padding: 25px 10px 40px;
 }
 
@@ -119,17 +133,28 @@ html, body {
 /* ===== RIGHT PANEL ===== */
 /* RIGHT PANEL */
 .right {
-    width: 65%;
-    padding: 25px 15px;
+    width: 80%;
+    padding: 25px 40px;        /* ⭐ Equal left & right padding */
+    box-sizing: border-box;
+padding-left: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;   /* ⭐ Keeps content aligned like left side */
+} 
+.right .block {
+    width: 100%;
+    margin-bottom: 10px;
 }
+
 .right a, .left a {
     word-break: break-all;
 }
 
+/* Ensure equal left & right margins inside right panel */
 .right .block > div {
-    max-width: 550px;
-    margin-left: auto;
-    margin-right: auto;
+    text-align: justify;
+    text-justify: inter-word;
+    line-height: 1.5;
 }
 
 /* Force spacing below block titles */
@@ -169,7 +194,7 @@ html, body {
         print-color-adjust: exact !important;
     }
     .pdf-page {
-    background: #ffffff;
+    background: #ffffff !important;
     width: 794px;       /* full A4 width for PDF */
     padding: 30px;      /* internal padding for top/bottom spacing */
     box-sizing: border-box;
@@ -232,10 +257,10 @@ html, body {
         <div class="section-title">CONTACT</div>
         <ul id="contactList"></ul>
 
-        <div class="section-title">SKILLS</div>
+        <div class="section-title" id="skillsTitle">SKILLS</div>
         <ul id="skillsList"></ul>
 
-        <div class="section-title">LANGUAGES</div>
+        <div class="section-title" id="languagesTitle">LANGUAGES</div>
         <ul id="langList"></ul>
 
         <div class="section-title" id="hobbyTitle">HOBBIES</div>
@@ -379,21 +404,38 @@ else if (data.publicLinks) {
 
     document.getElementById("contactList").innerHTML = c;
 
-    let sk = "";
-    (data.skills || []).forEach(s => {
+  let sk = "";
+(data.skills || []).forEach(s => {
+    if (s.name && s.name.trim() !== "") {
         sk += `<li>
                 <div class="skill-item">${s.name}</div>
                 <div class="skill-cat">${s.category}</div>
                 <div class="skill-level">${s.level}</div>
                </li>`;
-    });
-    document.getElementById("skillsList").innerHTML = sk;
+    }
+});
 
-    let lg = "";
-    (data.languages || []).forEach(l => {
+document.getElementById("skillsList").innerHTML = sk;
+
+if (!sk.trim()) {
+    document.getElementById("skillsTitle").style.display = "none";
+    document.getElementById("skillsList").style.display = "none";
+}
+
+   let lg = "";
+(data.languages || []).forEach(l => {
+    if (l.name && l.name.trim() !== "") {
         lg += `<li><span class="bold">${l.name}</span> - ${l.level}</li>`;
-    });
-    document.getElementById("langList").innerHTML = lg;
+    }
+});
+
+document.getElementById("langList").innerHTML = lg;
+
+if (!lg.trim()) {
+    document.getElementById("languagesTitle").style.display = "none";
+    document.getElementById("langList").style.display = "none";
+}
+
 
     let hb = "";
     (data.hobbies || []).forEach(h => {
@@ -406,8 +448,12 @@ else if (data.publicLinks) {
         document.getElementById("hobbyList").style.display = "none";
     }
 
-    let ed = "";
-    (data.education || []).forEach(e => {
+   let ed = "";
+(data.education || []).forEach(e => {
+    if ((e.degree && e.degree.trim() !== "") ||
+        (e.institution && e.institution.trim() !== "") ||
+        (e.score && e.score.trim() !== "") ||
+        (e.description && e.description.trim() !== "")) {
         ed += `
         <div class="edu-item">
             <div class="bold">${e.degree}</div>
@@ -417,11 +463,17 @@ else if (data.publicLinks) {
             <div class="bold">${e.scoreType || "Score"}: ${e.score || ""}</div>
             <div>${e.description || ""}</div>
         </div>`;
-    });
-    document.getElementById("education").innerHTML = ed;
+    }
+});
+document.getElementById("education").innerHTML = ed;
+document.getElementById("education").parentNode.style.display = ed.trim() ? "block" : "none";
 
-    let ex = "";
-    (data.experience || []).forEach(x => {
+
+  let ex = "";
+(data.experience || []).forEach(x => {
+    if ((x.jobTitle && x.jobTitle.trim() !== "") ||
+        (x.company && x.company.trim() !== "") ||
+        (x.description && x.description.trim() !== "")) {
         ex += `
         <div class="exp-item">
             <div class="bold">${x.jobTitle}</div>
@@ -430,11 +482,17 @@ else if (data.publicLinks) {
 
             <div>${x.description}</div>
         </div>`;
-    });
-    document.getElementById("experience").innerHTML = ex;
+    }
+});
+document.getElementById("experience").innerHTML = ex;
+document.getElementById("experience").parentNode.style.display = ex.trim() ? "block" : "none";
 
-    let pr = "";
-    (data.projects || []).forEach(p => {
+
+  let pr = "";
+(data.projects || []).forEach(p => {
+    if ((p.name && p.name.trim() !== "") ||
+        (p.projectUrl && p.projectUrl.trim() !== "") ||
+        (p.description && p.description.trim() !== "")) {
         pr += `
         <div class="project-item">
             <div class="bold">${p.name}</div>
@@ -443,11 +501,17 @@ else if (data.publicLinks) {
 
             <div>${p.description}</div>
         </div>`;
-    });
-    document.getElementById("projects").innerHTML = pr;
+    }
+});
+document.getElementById("projects").innerHTML = pr;
+document.getElementById("projects").parentNode.style.display = pr.trim() ? "block" : "none";
 
-    let ct = "";
-    (data.certifications || []).forEach(c => {
+   let ct = "";
+(data.certifications || []).forEach(c => {
+    if ((c.name && c.name.trim() !== "") ||
+        (c.issuer && c.issuer.trim() !== "") ||
+        (c.url && c.url.trim() !== "") ||
+        (c.date && c.date.trim() !== "")) {
         ct += `
         <div class="cert-item">
             <div class="bold">${c.name}</div>
@@ -455,11 +519,17 @@ else if (data.publicLinks) {
             ${c.url ? `<div><a href="${c.url}" target="_blank">${c.url}</a></div>` : ""}
             <div>${c.date}</div>
         </div>`;
-    });
-    document.getElementById("certifications").innerHTML = ct;
+    }
+});
+document.getElementById("certifications").innerHTML = ct;
+document.getElementById("certifications").parentNode.style.display = ct.trim() ? "block" : "none";
 
-    let inn = "";
-    (data.internships || []).forEach(i => {
+
+  let inn = "";
+(data.internships || []).forEach(i => {
+    if ((i.name && i.name.trim() !== "") ||
+        (i.organization && i.organization.trim() !== "") ||
+        (i.description && i.description.trim() !== "")) {
         inn += `
         <div class="intern-item">
             <div class="bold">${i.name}</div>
@@ -468,33 +538,43 @@ else if (data.publicLinks) {
 
             <div>${i.description}</div>
         </div>`;
-    });
-    document.getElementById("internships").innerHTML = inn;
+    }
+});
+document.getElementById("internships").innerHTML = inn;
+document.getElementById("internships").parentNode.style.display = inn.trim() ? "block" : "none";
 
-    let ach = "";
-    (data.achievements || []).forEach(a => {
-        let text = typeof a === "string" ? a : a.achievement || Object.values(a)[0] || "";
+
+  let ach = "";
+(data.achievements || []).forEach(a => {
+    let text = typeof a === "string" ? a : a.achievement || Object.values(a)[0] || "";
+    if (text.trim() !== "") {
         ach += `<div class="ach-item"><div>${text}</div></div>`;
-    });
+    }
+});
+document.getElementById("achievements").innerHTML = ach;
+document.getElementById("achievementsBlock").style.display = ach.trim() ? "block" : "none";
 
     document.getElementById("achievements").innerHTML = ach;
     document.getElementById("achievementsBlock").style.display =
         ach.trim() !== "" ? "block" : "none";
+if (data.additionalInfo?.trim()) {
+    document.getElementById("additionalInfo").innerText = data.additionalInfo;
+    document.getElementById("additionalInfoBlock").style.display = "block";
+} else {
+    document.getElementById("additionalInfoBlock").style.display = "none";
+}
 
-    if (data.additionalInfo?.trim()) {
-        document.getElementById("additionalInfo").innerText = data.additionalInfo;
-        document.getElementById("additionalInfoBlock").style.display = "block";
-    } else {
-        document.getElementById("additionalInfoBlock").style.display = "none";
-    }
 
-    const declaration = (data.declaration || "").trim();
-    if (declaration.length > 0) {
-        document.getElementById("declaration").textContent = declaration;
-        document.getElementById("declarationBlock").style.display = "block";
-    } else {
-        document.getElementById("declarationBlock").style.display = "none";
-    }
+
+const declaration = (data.declaration || "").trim();
+if (declaration.length > 0) {
+    document.getElementById("declaration").textContent = declaration;
+    document.getElementById("declarationBlock").style.display = "block";
+} else {
+    document.getElementById("declarationBlock").style.display = "none";
+}
+
+
 }
 
 renderTemplate5();
