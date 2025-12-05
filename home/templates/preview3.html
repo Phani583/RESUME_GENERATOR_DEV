@@ -1,10 +1,9 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>Resume Preview 3 – Timeline Layout</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="style.css" />
     <style>
       body {
         font-family: "Segoe UI", Roboto, sans-serif;
@@ -19,13 +18,27 @@
         background: white;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         border-radius: 12px;
-        padding: 40px;
+        padding: 25px 25px;
         transition: font-size 0.2s ease-in-out;
       }
-
       .header {
+        display: flex;
+        align-items: center;
+        gap: 60px;
         text-align: center;
         margin-bottom: 10px;
+      }
+
+      .header-photo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .header-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
       }
 
       .header h1 {
@@ -40,20 +53,21 @@
       }
 
       .section {
-        margin-top: 30px;
+        margin-top: 10px;
       }
 
       .section h2 {
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 4px;
+        font-size: 20px;
+        border-bottom: 1px solid #007bff;
+        padding-bottom: 2px;
         color: #007bff;
-        margin-bottom: 20px;
+        margin-bottom: 0px;
       }
 
       /* --- TIMELINE STYLE --- */
       .timeline {
         position: relative;
-        margin: 20px 0 0 20px;
+        margin: 10px 0 0 10px;
         padding-left: 20px;
       }
 
@@ -63,14 +77,14 @@
         left: 0;
         top: 0;
         bottom: 0;
-        width: 3px;
+        width: 1px;
         background: linear-gradient(180deg, #007bff, #20c997);
         border-radius: 4px;
       }
 
       .timeline-item {
         position: relative;
-        margin-bottom: 25px;
+        margin-bottom: 0px;
       }
 
       .timeline-item::before {
@@ -89,19 +103,19 @@
       .timeline-item h3 {
         margin: 0;
         color: #222;
-        font-size: 17px;
+        font-size: 16px;
       }
 
       .timeline-item p {
         margin: 4px 0;
         color: #555;
-        font-size: 14px;
+        font-size: 16px;
       }
 
       .timeline-item small {
         display: block;
         color: #007bff;
-        font-size: 13px;
+        font-size: 16px;
         margin-bottom: 5px;
       }
 
@@ -143,33 +157,82 @@
       }
 
       @media print {
-        /* Hide buttons & controls */
+        /* Allow sections and timeline items to break normally */
+        .section,
+        .timeline {
+          page-break-inside: auto !important;
+          break-inside: auto !important;
+        }
+
+        /* Prevent only text lines from cutting */
+        p {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+        }
+
+        /* Hide UI */
         .actions,
         #fontSizeControls,
         #topControls {
           display: none !important;
         }
 
-        /* Remove browser default margins */
         @page {
           size: A4;
-          margin: 0;
+          margin: 12mm 14mm;
         }
 
-        /* Full white background */
         body {
           background: white !important;
-          margin: 0;
-          padding: 0;
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
-        /* Perfect print margins */
         .resume-wrapper {
-          margin: 8mm !important; /* Clean and balanced margins */
-          padding: 0 !important; /* Remove extra internal padding */
+          margin: 0 !important;
+          padding: 6mm 8mm !important;
           box-shadow: none !important;
           border-radius: 0 !important;
           width: auto !important;
+          box-sizing: border-box !important;
+          font-size: 14px !important;
+        }
+
+        /* Section title line */
+        .section h2 {
+          border-bottom: 0.5px solid #007bff !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          page-break-after: auto !important;
+        }
+
+        /* Timeline vertical line */
+        .timeline {
+          position: relative;
+          border-left: 1px solid #007bff !important;
+          padding-left: 6px !important;
+        }
+
+        .timeline-item::before {
+          width: 10px !important;
+          height: 10px !important;
+          border: 1px solid #007bff !important;
+          box-shadow: 0 0 0 2px #e5f1ff !important;
+          left: -6px !important;
+        }
+
+        /* LINE SPACING (safe for PDF + prevents cutting) */
+        p,
+        li,
+        .timeline-item p,
+        .timeline-item h3,
+        .timeline-item small {
+          line-height: 1.7 !important;
+          margin-bottom: 5px !important;
+        }
+
+        .timeline-item {
+          margin-bottom: 6px !important;
         }
       }
 
@@ -197,6 +260,21 @@
         cursor: pointer;
       }
 
+      /* ====== GLOBAL LINE SPACING FOR PDF (html2canvas uses this) ====== */
+      .resume-wrapper li,
+      .timeline-item p,
+      .timeline-item h3,
+      .timeline-item small,
+      .section p,
+      .section li {
+        line-height: 1.8 !important;
+        margin-bottom: 6px !important;
+      }
+
+      .timeline-item {
+        margin-bottom: 8px !important;
+      }
+
       /* Responsive mobile view */
       @media (max-width: 600px) {
         #topControls {
@@ -222,38 +300,60 @@
         #topSpacer {
           height: 120px; /* extra space for stacked toolbar */
         }
+        /* Optional: reduce spacing to fit more content */
+        .section {
+          margin-top: 6px !important;
+        }
+        .timeline {
+          position: relative;
+        }
+
+        .timeline::before {
+          content: "";
+          position: absolute;
+          left: 10px; /* adjust value to match your design */
+          top: 0;
+          bottom: 0;
+          width: 1.5px; /* thinner vertical line */
+          background-color: #bfbfbf;
+          z-index: 2;
+        }
+
+        /* Timeline container can split */
+        .timeline-item {
+          page-break-inside: auto !important; /* allow splitting if content is tall */
+          break-inside: auto !important;
+          margin-bottom: 8px !important;
+        }
+
+        /* Paragraphs/headings inside timeline-item won’t split */
+        .pdf-block-avoid-break p,
+        .pdf-block-avoid-break h3,
+        .pdf-block-avoid-break small {
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          line-height: 1.6 !important;
+          margin-bottom: 6px !important;
+        }
+
+        .pdf-block {
+          page-break-inside: auto !important;
+          break-inside: auto !important;
+        }
+      }
+      /* Prevent paragraphs, headings, and timeline-items from splitting */
+      .pdf-block-avoid-break {
+        page-break-inside: avoid !important; /* Prevent splitting across pages */
+        break-inside: avoid !important; /* Modern browsers */
+        display: block;
       }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   </head>
   <body>
     <!-- Top Toolbar (Preview2 style) -->
-    <div
-      id="fontSizeControls"
-      style="
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 15px;
-        padding: 12px 14px;
-        background: #f8f8f8;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      "
-    >
-      <label for="fontSizeRange" style="font-size: 15px">Font Size:</label>
-      <input
-        type="range"
-        id="fontSizeRange"
-        min="12"
-        max="24"
-        value="16"
-        step="1"
-      />
-      <span id="fontSizeValue" style="font-size: 14px">16px</span>
-    </div>
     <div class="actions">
-      <button onclick="window.print()">Download PDF</button>
+      <button onclick="downloadPDF()">Download PDF</button>
     </div>
 
     <div class="resume-wrapper" id="resume"></div>
@@ -261,6 +361,77 @@
     <script>
       const data = JSON.parse(localStorage.getItem("resumeData") || "{}");
       const resume = document.getElementById("resume");
+      // Wrap timeline-items and paragraphs/headings in PDF-safe blocks
+      (function wrapPdfBlocks() {
+        const resumeEl = document.getElementById("resume");
+        if (!resumeEl) return;
+
+        // Wrap timeline-items
+        const timelineItems = resumeEl.querySelectorAll(".timeline-item");
+        timelineItems.forEach((item) => {
+          if (!item.classList.contains("pdf-block-avoid-break")) {
+            item.classList.add("pdf-block-avoid-break");
+          }
+        });
+
+        // Wrap remaining top-level paragraphs inside sections
+        const paragraphs = resumeEl.querySelectorAll(".section > p");
+        paragraphs.forEach((p) => {
+          if (!p.parentNode.classList.contains("pdf-block-avoid-break")) {
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("pdf-block-avoid-break");
+            p.parentNode.insertBefore(wrapper, p);
+            wrapper.appendChild(p);
+          }
+        });
+      })();
+
+      function downloadPDF() {
+        const element = document.getElementById("resume");
+
+        // Clone the element so we don't modify preview
+        const clone = element.cloneNode(true);
+
+        // Wrap only headings and paragraphs individually
+        const blocks = clone.querySelectorAll("p, h3, small");
+        blocks.forEach((el) => {
+          const wrapper = document.createElement("div");
+          wrapper.classList.add("pdf-block-avoid-break");
+          el.parentNode.insertBefore(wrapper, el);
+          wrapper.appendChild(el);
+        });
+
+        // Optional: set padding/margin inline for better PDF layout
+        clone.style.padding = "6mm";
+        clone.style.boxSizing = "border-box";
+
+        const opt = {
+          margin: [9, 0, 14, 0],
+          filename: "resume.pdf",
+          image: { type: "jpeg", quality: 1 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+          },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["css"] },
+          // respects the CSS page-break rules
+        };
+
+        // Append temporarily for rendering
+        document.body.appendChild(clone);
+
+        html2pdf()
+          .set(opt)
+          .from(clone)
+          .save()
+          .then(() => clone.remove())
+          .catch((err) => {
+            console.error("PDF error", err);
+            clone.remove();
+          });
+      }
 
       function safe(s = "") {
         return String(s).replace(
@@ -301,14 +472,20 @@
 
       resume.innerHTML = `
         <div class="header">
-          ${
-            pi.profilePhoto
-              ? `<img src="${pi.profilePhoto}" width="100" height="100" style="border-radius:50%;object-fit:cover;margin-bottom:10px;">`
-              : ""
-          }
-          <h1>${safe(pi.fullName || "")}</h1>
-          <div class="contact">${contact.join(" | ")}</div>
-        </div>
+  <div class="header-photo">
+    ${
+      pi.profilePhoto
+        ? `<img src="${pi.profilePhoto}" width="100" height="100" style="border-radius:50%;object-fit:cover;margin-bottom:10px;">`
+        : ""
+    }
+  </div>
+
+  <div class="header-info">
+    <h1>${safe(pi.fullName || "")}</h1>
+    <div class="contact">${contact.join(" | ")}</div>
+  </div>
+</div>
+
       `;
 
       function addSection(title, html) {
@@ -324,43 +501,57 @@
       // Timeline-based sections
       function buildTimeline(arr, formatter) {
         if (!Array.isArray(arr) || !arr.length) return "";
-        return `<div class="timeline">${arr.map(formatter).join("")}</div>`;
+        return `<div class="timeline">
+    ${arr
+      .map((item) => {
+        const html = formatter(item);
+        return html; // Remove pdf-block wrapper completely
+      })
+      .join("")}
+  </div>`;
       }
 
-      // Experience
+      // ===== Education Section (Preview3 Timeline Style) =====
+      if (Array.isArray(data.education) && data.education.length) {
+        const html = buildTimeline(data.education, (e) => {
+          const start = safe(e.startDate || "");
+          const end = safe(e.endDate || "Present");
+
+          // Correct score + scoreType
+          const score = e.score ? safe(e.score) : "";
+          const type = e.scoreType ? safe(e.scoreType) : "";
+          const scoreType =
+            score && type ? `${score} ${type}` : score || type || "";
+
+          return `
+      <div class="timeline-item">
+        <small>${start} - ${end}</small>
+        <h3>${safe(e.degree || "")}${scoreType ? ` | ${scoreType}` : ""}</h3>
+        <p>${safe(e.institution || "")}</p>
+        ${e.description ? `<p>${safe(e.description)}</p>` : ""}
+      </div>
+    `;
+        });
+
+        addSection("Education", html);
+      }
+
+      // Work Experience
       if (Array.isArray(data.experience) && data.experience.length) {
         const html = buildTimeline(
           data.experience,
           (e) => `
-          <div class="timeline-item">
-            <small>${safe(e.startDate || "")} - ${safe(
+      <div class="timeline-item">
+        <small>${safe(e.startDate || "")} - ${safe(
             e.endDate || "Present"
           )}</small>
-            <h3>${safe(e.jobTitle || "")}</h3>
-            <p>${safe(e.company || "")}</p>
-            ${e.description ? `<p>${safe(e.description)}</p>` : ""}
-          </div>
-        `
+        <h3>${safe(e.jobTitle || "")}</h3>
+        <p>${safe(e.company || "")}</p>
+        ${e.description ? `<p>${safe(e.description)}</p>` : ""}
+      </div>
+    `
         );
         addSection("Work Experience", html);
-      }
-
-      // Education
-      if (Array.isArray(data.education) && data.education.length) {
-        const html = buildTimeline(
-          data.education,
-          (e) => `
-          <div class="timeline-item">
-            <small>${safe(e.startDate || "")} - ${safe(
-            e.endDate || "Present"
-          )}</small>
-            <h3>${safe(e.degree || "")}</h3>
-            <p>${safe(e.institution || "")}</p>
-            ${e.description ? `<p>${safe(e.description)}</p>` : ""}
-          </div>
-        `
-        );
-        addSection("Education", html);
       }
 
       // Internships
@@ -368,50 +559,95 @@
         const html = buildTimeline(
           data.internships,
           (i) => `
-          <div class="timeline-item">
-            <small>${safe(i.startDate || "")} - ${safe(
+      <div class="timeline-item">
+        <small>${safe(i.startDate || "")} - ${safe(
             i.endDate || "Present"
           )}</small>
-            <h3>${safe(i.name || "")}</h3>
-            <p>${safe(i.organization || "")}</p>
-            ${i.description ? `<p>${safe(i.description)}</p>` : ""}
-          </div>
-        `
+        
+        <p><h3>${safe(i.name || "")}</h3><br>${safe(i.organization || "")}</p>
+        ${i.description ? `<p>${safe(i.description)}</p>` : ""}
+      </div>
+    `
         );
         addSection("Internships", html);
       }
 
-      // Projects
+      // Projects (With Start-End in same line)
       if (Array.isArray(data.projects)) {
         const html = data.projects
-          .map(
-            (p) => `
-          <p><strong>${safe(p.name || "")}</strong> ${
-              p.projectUrl
-                ? `- <a href="${ensureUrl(
-                    p.projectUrl
-                  )}" target="_blank">${safe(p.projectUrl)}</a>`
-                : ""
-            }</p>
-          ${p.description ? `<p>${safe(p.description)}</p>` : ""}
-        `
-          )
+          .map((p) => {
+            const start = safe(p.startDate || "");
+            const end = safe(p.endDate || "Present");
+
+            return `
+        <p>
+          <strong>${safe(p.name || "")}</strong>
+          ${start || end ? ` (${start} - ${end})` : ""}
+          ${
+            p.projectUrl
+              ? ` - <a href="${ensureUrl(p.projectUrl)}" target="_blank">${safe(
+                  p.projectUrl
+                )}</a>`
+              : ""
+          }
+        </p>
+        ${p.description ? `<p>${safe(p.description)}</p>` : ""}
+      `;
+          })
           .join("");
+
         addSection("Projects", html);
+      }
+
+      // Certifications (Timeline Style)
+      // Certifications (Same Timeline Style as Internships)
+      if (Array.isArray(data.certifications) && data.certifications.length) {
+        const html = buildTimeline(
+          data.certifications,
+          (c) => `
+      <div class="timeline-item">
+        <small>${safe(c.date || "")}</small>
+        <h3>${safe(c.name || c.title || "")}</h3>
+        <p>
+          ${safe(c.issuer || "")}
+          ${
+            c.url
+              ? ` | <a href="${safe(
+                  c.url
+                )}" target="_blank">Certificate Link</a>`
+              : ""
+          }
+        </p>
+        ${c.description ? `<p>${safe(c.description)}</p>` : ""}
+      </div>
+    `
+        );
+
+        addSection("Certifications", html);
       }
 
       // Skills
       if (Array.isArray(data.skills)) {
         const html = `<ul>${data.skills
-          .map((s) => `<li>${safe(s.name || "")}</li>`)
+          .map(
+            (s) =>
+              `<li>${safe(s.name || "")}${
+                s.level ? ` - ${safe(s.level)}` : ""
+              }</li>`
+          )
           .join("")}</ul>`;
         addSection("Skills", html);
       }
 
-      // Languages
+      // Languages (with level on same line)
       if (Array.isArray(data.languages)) {
         const html = `<ul>${data.languages
-          .map((l) => `<li>${safe(l.name || "")}</li>`)
+          .map(
+            (l) =>
+              `<li>${safe(l.name || "")}${
+                l.level ? ` – ${safe(l.level)}` : ""
+              }</li>`
+          )
           .join("")}</ul>`;
         addSection("Languages", html);
       }
@@ -426,6 +662,14 @@
           .map((h) => `<li>${safe(h.hobby)}</li>`)
           .join("")}</ul>`;
         addSection("Hobbies", html);
+      }
+
+      // Achievements
+      if (Array.isArray(data.achievements) && data.achievements.length) {
+        const html = `<ul>${data.achievements
+          .map((a) => `<li>${safe(a.title || a.achievement || "")}</li>`)
+          .join("")}</ul>`;
+        addSection("Achievements", html);
       }
 
       // Additional Info + Declaration
