@@ -580,29 +580,289 @@ if (declaration.length > 0) {
 renderTemplate5();
 window.addEventListener("storage", renderTemplate5);
 
+/* ---------- ensureHtml2Pdf helper ----------
+   Loads html2canvas, jsPDF and html2pdf if missing.
+   Returns a Promise that resolves when libs are ready.
+   Paste this BEFORE function downloadPDF().
+*/
+function ensureHtml2Pdf(timeout = 12000) {
+  return new Promise((resolve, reject) => {
+    try {
+      // If already present, normalize globals and resolve.
+      if (
+        window.html2pdf &&
+        (window.html2canvas || (window.html2pdf && window.html2pdf.html2canvas)) &&
+        (window.jsPDF || (window.jspdf && window.jspdf.jsPDF) || (window.html2pdf && window.html2pdf.jsPDF))
+      ) {
+        if (!window.html2canvas && window.html2pdf && window.html2pdf.html2canvas) window.html2canvas = window.html2pdf.html2canvas;
+        if (!window.jsPDF) {
+          if (window.jspdf && window.jspdf.jsPDF) window.jsPDF = window.jspdf.jsPDF;
+          if (window.html2pdf && window.html2pdf.jsPDF) window.jsPDF = window.html2pdf.jsPDF;
+        }
+        return resolve();
+      }
+
+      const libs = [
+        { src: "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js", check: () => !!window.html2canvas || !!(window.html2pdf && window.html2pdf.html2canvas) },
+        { src: "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", check: () => !!(window.jspdf && window.jspdf.jsPDF) || !!window.jsPDF },
+        { src: "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js", check: () => !!window.html2pdf }
+      ];
+
+      let i = 0;
+      function loadNext() {
+        if (i >= libs.length) {
+          // final normalization
+          if (!window.html2canvas && window.html2pdf && window.html2pdf.html2canvas) window.html2canvas = window.html2pdf.html2canvas;
+          if (!window.jsPDF) {
+            if (window.jspdf && window.jspdf.jsPDF) window.jsPDF = window.jspdf.jsPDF;
+            if (window.html2pdf && window.html2pdf.jsPDF) window.jsPDF = window.html2pdf.jsPDF;
+          }
+          if ((window.html2canvas || window.html2pdf?.html2canvas) && (window.jsPDF || window.jspdf?.jsPDF || window.html2pdf?.jsPDF)) return resolve();
+          return reject(new Error("Libraries loaded but not attached to window."));
+        }
+
+        if (libs[i].check()) {
+          i++;
+          return loadNext();
+        }
+
+        const s = document.createElement("script");
+        s.src = libs[i].src;
+        s.async = true;
+        s.onload = () => {
+          // small delay to let the library attach
+          setTimeout(() => {
+            // normalize early
+            if (!window.html2canvas && window.html2pdf && window.html2pdf.html2canvas) window.html2canvas = window.html2pdf.html2canvas;
+            if (!window.jsPDF) {
+              if (window.jspdf && window.jspdf.jsPDF) window.jsPDF = window.jspdf.jsPDF;
+              if (window.html2pdf && window.html2pdf.jsPDF) window.jsPDF = window.html2pdf.jsPDF;
+            }
+            i++;
+            loadNext();
+          }, 40);
+        };
+        s.onerror = () => reject(new Error("Failed to load " + libs[i].src));
+        document.head.appendChild(s);
+      }
+
+      loadNext();
+
+      // timeout safety
+      setTimeout(() => {
+        if ((window.html2canvas || window.html2pdf?.html2canvas) && (window.jsPDF || window.jspdf?.jsPDF || window.html2pdf?.jsPDF)) {
+          return resolve();
+        }
+        reject(new Error("Timed out loading PDF libraries."));
+      }, timeout);
+
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 <!-- ⭐ PERFECT PDF ALIGNMENT -->
 function downloadPDF() {
-    const element = document.querySelector(".pdf-page");
+  (async () => {
+    try {
+      // 1) make sure html2pdf/html2canvas/jsPDF are available (loads CDN if needed)
+      await ensureHtml2Pdf();
 
-    html2pdf()
-        .set({
-            margin: [0, 0, 0, 0],      // ZERO margin
-            filename: 'resume_template5.pdf',
-            html2canvas: {
-                scale: 3,               // high-res
-                useCORS: true,
-                backgroundColor: "#fdeeee" // full page background
-            },
-            jsPDF: {
-                unit: 'pt',
-                format: [794, 1123],    // exact A4 size in pixels
-                orientation: 'portrait'
-            },
-            pagebreak: { mode: ['avoid-all', 'css'] }
-        })
-        .from(element)
-        .save();
+      // pick root to capture (page-wrapper preferred)
+      const rootEl = document.querySelector(".page-wrapper") || document.querySelector(".pdf-page") || document.getElementById("resumeRoot");
+      if (!rootEl) throw new Error("Capture root not found: .page-wrapper or .pdf-page or #resumeRoot");
+
+      // 2) try converting visible images (avatar / left images / #photo) to dataURLs to avoid CORS problems
+      const imageSelectors = ["#avatarImg", "#photo", ".left img", ".avatar img", "img"];
+      const images = [];
+      imageSelectors.forEach(sel => {
+        Array.from(rootEl.querySelectorAll(sel)).forEach(i => images.push(i));
+      });
+
+      // try convert each image to dataURL (best-effort)
+      for (const img of images) {
+        if (!img || !img.src) continue;
+        try {
+          // skip if already data URL
+          if (img.src.startsWith("data:")) continue;
+
+          // attempt fetch & blob -> dataURL (works when page is served over http(s))
+          const resp = await fetch(img.src, { mode: "cors" });
+          if (resp.ok) {
+            const blob = await resp.blob();
+            await new Promise((res, rej) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                img.src = reader.result; // replace src with data url
+                res();
+              };
+              reader.onerror = () => rej(new Error("FileReader failed"));
+              reader.readAsDataURL(blob);
+            });
+          } else {
+            // If fetch fails, set crossOrigin and try to reload image (may still fail)
+            img.crossOrigin = "anonymous";
+            try {
+              await new Promise((res, rej) => {
+                img.onload = () => res();
+                img.onerror = () => rej();
+                const src = img.src;
+                img.src = src + (src.includes("?") ? "&" : "?") + "cache-bust=" + Date.now();
+              });
+            } catch (e) {
+              console.warn("Image fetch/convert failed for", img.src, e);
+            }
+          }
+        } catch (e) {
+          console.warn("image conversion skipped for", img.src, e);
+        }
+      }
+
+      // 3) pick html2canvas + jsPDF implementations (they are ensured by ensureHtml2Pdf)
+      const html2canvasFn = window.html2canvas || (window.html2pdf && window.html2pdf.html2canvas);
+      const jsPDFClass = window.jsPDF || (window.jspdf && window.jspdf.jsPDF) || (window.html2pdf && window.html2pdf.jsPDF);
+      if (!html2canvasFn) throw new Error("html2canvas not available after loader.");
+      if (!jsPDFClass) throw new Error("jsPDF not available after loader.");
+
+      // 4) do screen capture into canvas
+      const DPR = Math.min(window.devicePixelRatio || 1, 3);
+      const canvas = await html2canvasFn(rootEl, {
+        scale: DPR,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: window.getComputedStyle(rootEl).backgroundColor || "#ffffff",
+        logging: false
+      });
+
+      // 5) calculate A4 sizes (mm -> px)
+      const A4_W_MM = 210, A4_H_MM = 297;
+      const pxPerMm = (96 * DPR) / 25.4;
+      const a4Wpx = Math.round(A4_W_MM * pxPerMm);
+      const a4Hpx = Math.round(A4_H_MM * pxPerMm);
+
+      // 6) scale horizontally if needed to fit A4 width
+      const capturedW = canvas.width, capturedH = canvas.height;
+      const widthScale = Math.min(1, a4Wpx / capturedW);
+      const targetWpx = Math.round(capturedW * widthScale);
+      const targetHpx = Math.round(capturedH * widthScale);
+      let finalCanvas = canvas;
+      if (widthScale !== 1) {
+        const tmp = document.createElement("canvas");
+        tmp.width = targetWpx;
+        tmp.height = targetHpx;
+        const ctx = tmp.getContext("2d");
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, tmp.width, tmp.height);
+        finalCanvas = tmp;
+      }
+
+      // 7) paging math (margins are small to match your layout)
+      const TOP_MARGIN_MM = 12, BOTTOM_MARGIN_MM = 12;
+      const topMarginPx = Math.round(TOP_MARGIN_MM * pxPerMm);
+      const bottomMarginPx = Math.round(BOTTOM_MARGIN_MM * pxPerMm);
+      const availableHeightPx = a4Hpx - topMarginPx - bottomMarginPx;
+      const firstPageHeightPx = a4Hpx - bottomMarginPx;
+      const subsequentPageHeightPx = availableHeightPx;
+
+      const actualPages = Math.max(
+        1,
+        Math.ceil(Math.max(0, finalCanvas.height - firstPageHeightPx) / subsequentPageHeightPx) + (finalCanvas.height > 0 ? 1 : 0)
+      );
+
+      // 8) compute sidebar width in canvas px
+      const leftEl = document.querySelector(".left");
+      let sidebarCssPx = leftEl ? leftEl.getBoundingClientRect().width : Math.round(0.32 * rootEl.getBoundingClientRect().width || 230);
+      const sidebarPx = Math.round(sidebarCssPx * DPR * widthScale);
+
+      // 9) create page images drawing the full-height sidebar color for each page
+      const pageImages = [];
+      const sidebarColor = getComputedStyle(document.documentElement).getPropertyValue("--sidebar-bg") || "#f8c6cc";
+      for (let p = 0; p < actualPages; p++) {
+        const sliceStartY = p === 0 ? 0 : firstPageHeightPx + (p - 1) * subsequentPageHeightPx;
+        const srcH = Math.min(p === 0 ? firstPageHeightPx : subsequentPageHeightPx, Math.max(0, finalCanvas.height - sliceStartY));
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = a4Wpx;
+        pageCanvas.height = a4Hpx;
+        const ctx = pageCanvas.getContext("2d");
+
+        // draw left stripe full height (so it appears on every page)
+        ctx.fillStyle = sidebarColor.trim();
+        ctx.fillRect(0, 0, sidebarPx, a4Hpx);
+        // draw white right background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(sidebarPx, 0, a4Wpx - sidebarPx, a4Hpx);
+
+        const drawOffsetY = p === 0 ? 0 : topMarginPx;
+        const destW = a4Wpx;
+        const destH = Math.round(srcH * (destW / finalCanvas.width));
+        const destX = 0, destY = drawOffsetY;
+
+        if (srcH > 0 && destH > 0) {
+          ctx.drawImage(finalCanvas, 0, sliceStartY, finalCanvas.width, srcH, destX, destY, destW, destH);
+        }
+
+        pageImages.push(pageCanvas.toDataURL("image/jpeg", 1.0));
+      }
+
+      // 10) compose PDF via jsPDF (mm units)
+      const doc = new jsPDFClass({ unit: "mm", format: "a4", orientation: "portrait" });
+      for (let p = 0; p < pageImages.length; p++) {
+        if (p > 0) doc.addPage();
+        doc.addImage(pageImages[p], "JPEG", 0, 0, A4_W_MM, A4_H_MM, undefined, "NONE");
+      }
+
+      // 11) (optional) try to add anchor links mapping (best-effort)
+      try {
+        const anchors = Array.from(rootEl.querySelectorAll("a[href]")).map(a => {
+          const href = a.href;
+          const r = a.getBoundingClientRect();
+          const rr = rootEl.getBoundingClientRect();
+          return { href, leftCss: r.left - rr.left, topCss: r.top - rr.top, widthCss: r.width, heightCss: r.height };
+        });
+        const FIRST_PAGE_HEIGHT_MM = firstPageHeightPx / pxPerMm;
+        const SUBSEQ_PAGE_HEIGHT_MM = subsequentPageHeightPx / pxPerMm;
+        function cssPxToMm(cssPx) { return (cssPx * DPR * widthScale) / pxPerMm; }
+
+        anchors.forEach(a => {
+          if (!a.href) return;
+          const leftMm = cssPxToMm(a.leftCss);
+          const topMm = cssPxToMm(a.topCss);
+          const wMm = cssPxToMm(a.widthCss);
+          const hMm = cssPxToMm(a.heightCss);
+          function mmToPage(mmY) { if (mmY < FIRST_PAGE_HEIGHT_MM) return 0; return 1 + Math.floor((mmY - FIRST_PAGE_HEIGHT_MM) / SUBSEQ_PAGE_HEIGHT_MM); }
+          const startPage = mmToPage(topMm);
+          const endPage = mmToPage(topMm + hMm - 1e-6);
+          for (let page = startPage; page <= endPage; page++) {
+            if (page < 0 || page >= pageImages.length) continue;
+            const pageGlobalTopMm = page === 0 ? 0 : FIRST_PAGE_HEIGHT_MM + (page - 1) * SUBSEQ_PAGE_HEIGHT_MM;
+            const segTopGlobal = Math.max(topMm, pageGlobalTopMm);
+            const segBottomGlobal = Math.min(topMm + hMm, pageGlobalTopMm + SUBSEQ_PAGE_HEIGHT_MM);
+            const segHeightMm = segBottomGlobal - segTopGlobal;
+            if (segHeightMm <= 0) continue;
+            let localTopMm = page === 0 ? segTopGlobal : segTopGlobal - pageGlobalTopMm + TOP_MARGIN_MM;
+            const safeLeft = Math.max(0, leftMm);
+            const safeTop = Math.max(0, localTopMm);
+            const safeWidth = Math.max(0.1, wMm);
+            const safeHeight = Math.max(0.1, segHeightMm);
+            doc.setPage(page + 1);
+            doc.link(safeLeft, safeTop, safeWidth, safeHeight, { url: a.href });
+          }
+        });
+      } catch (e) {
+        console.warn("link mapping skipped:", e);
+      }
+
+      // 12) save PDF
+      doc.save("resume_template5.pdf");
+      console.log("PDF exported successfully.");
+    } catch (err) {
+      console.error("downloadPDF error:", err);
+      alert("PDF export failed — check console. Common causes: running page via file:// (use http), or blocked cross-origin images. See console for details.");
+    }
+  })();
 }
+
 
 
 function downloadTXT() {
