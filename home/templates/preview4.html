@@ -471,6 +471,35 @@
           return u;
         return "https://" + u;
       }
+      function formatMonthYear(val) {
+        if (!val) return "";
+        val = String(val).trim();
+        // already "Aug 2020"
+        if (/^[A-Za-z]{3,}\s+\d{4}$/.test(val)) return val;
+        // YYYY-MM
+        const m = val.match(/^(\d{4})-(\d{2})$/);
+        if (m) {
+          const y = m[1];
+          const mm = parseInt(m[2], 10);
+          const months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+          return (months[mm - 1] || "") + " " + y;
+        }
+        // fallback: return as-is
+        return val;
+      }
 
       // find element by selector + contained text (replaces :contains)
       function querySelectorByText(selector, text, { exact = false } = {}) {
@@ -706,9 +735,14 @@
           return arr
             .map((e) => {
               const title = safe(e.jobTitle || e.title || "");
-              const meta = `${safe(e.startDate || "")}${
-                e.endDate ? " - " + safe(e.endDate) : ""
+              const meta = `${formatMonthYear(e.startDate)}${
+                e.current
+                  ? " - Present"
+                  : e.endDate
+                  ? " - " + formatMonthYear(e.endDate)
+                  : ""
               }`;
+
               const company = safe(e.company || e.employer || "");
               const desc = e.description
                 ? `<div class="tl-desc">${safe(e.description).replace(
@@ -727,9 +761,14 @@
             .map((e) => {
               const degree = safe(e.degree || "");
               const inst = safe(e.institution || e.school || "");
-              const meta = `${safe(e.startDate || "")}${
-                e.endDate ? " - " + safe(e.endDate) : ""
+              const meta = `${formatMonthYear(e.startDate)}${
+                e.current
+                  ? " - Present"
+                  : e.endDate
+                  ? " - " + formatMonthYear(e.endDate)
+                  : ""
               }`;
+
               const desc = e.description
                 ? `<div style="margin-top:6px">${safe(e.description).replace(
                     /\n/g,
@@ -751,9 +790,14 @@
           return arr
             .map((p) => {
               const title = safe(p.name || p.title || "");
-              const meta = `${safe(p.startDate || "")}${
-                p.endDate ? " - " + safe(p.endDate) : ""
+              const meta = `${formatMonthYear(p.startDate)}${
+                p.current
+                  ? " - Present"
+                  : p.endDate
+                  ? " - " + formatMonthYear(p.endDate)
+                  : ""
               }`;
+
               const desc = p.description
                 ? `<div class="tl-desc">${safe(p.description).replace(
                     /\n/g,
@@ -802,9 +846,14 @@
             .map((it) => {
               const title = safe(it.name || "");
               const org = safe(it.organization || it.company || "");
-              const meta = `${safe(it.startDate || "")}${
-                it.endDate ? " - " + safe(it.endDate) : ""
+              const meta = `${formatMonthYear(it.startDate)}${
+                it.current
+                  ? " - Present"
+                  : it.endDate
+                  ? " - " + formatMonthYear(it.endDate)
+                  : ""
               }`;
+
               const desc = it.description
                 ? `<div class="tl-desc">${safe(it.description).replace(
                     /\n/g,

@@ -446,6 +446,37 @@
             }[c])
         );
       }
+      function formatMonthYear(val) {
+        if (!val) return "";
+        val = String(val).trim();
+
+        // already "Aug 2020"
+        if (/^[A-Za-z]{3,}\s+\d{4}$/.test(val)) return val;
+
+        // YYYY-MM
+        const m = val.match(/^(\d{4})-(\d{2})$/);
+        if (m) {
+          const y = m[1];
+          const mm = parseInt(m[2], 10);
+          const months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+          return months[mm - 1] + " " + y;
+        }
+
+        return val;
+      }
 
       function ensureUrl(url) {
         if (!url) return "";
@@ -514,8 +545,8 @@
       // ===== Education Section (Preview3 Timeline Style) =====
       if (Array.isArray(data.education) && data.education.length) {
         const html = buildTimeline(data.education, (e) => {
-          const start = safe(e.startDate || "");
-          const end = safe(e.endDate || "Present");
+          const start = formatMonthYear(e.startDate);
+          const end = e.current ? "Present" : formatMonthYear(e.endDate);
 
           // Correct score + scoreType
           const score = e.score ? safe(e.score) : "";
@@ -541,14 +572,15 @@
         const html = buildTimeline(
           data.experience,
           (e) => `
-      <div class="timeline-item">
-        <small>${safe(e.startDate || "")} - ${safe(
-            e.endDate || "Present"
-          )}</small>
+           <div class="timeline-item">
+        <small>${formatMonthYear(e.startDate)} - ${
+            e.current ? "Present" : formatMonthYear(e.endDate)
+          }</small>
         <h3>${safe(e.jobTitle || "")}</h3>
         <p>${safe(e.company || "")}</p>
         ${e.description ? `<p>${safe(e.description)}</p>` : ""}
       </div>
+
     `
         );
         addSection("Work Experience", html);
@@ -559,14 +591,15 @@
         const html = buildTimeline(
           data.internships,
           (i) => `
-      <div class="timeline-item">
-        <small>${safe(i.startDate || "")} - ${safe(
-            i.endDate || "Present"
-          )}</small>
+            <div class="timeline-item">
+        <small>${formatMonthYear(i.startDate)} - ${
+            i.current ? "Present" : formatMonthYear(i.endDate)
+          }</small>
         
         <p><h3>${safe(i.name || "")}</h3><br>${safe(i.organization || "")}</p>
         ${i.description ? `<p>${safe(i.description)}</p>` : ""}
       </div>
+
     `
         );
         addSection("Internships", html);
@@ -576,8 +609,8 @@
       if (Array.isArray(data.projects)) {
         const html = data.projects
           .map((p) => {
-            const start = safe(p.startDate || "");
-            const end = safe(p.endDate || "Present");
+            const start = formatMonthYear(p.startDate);
+            const end = p.endDate ? formatMonthYear(p.endDate) : "";
 
             return `
         <p>
