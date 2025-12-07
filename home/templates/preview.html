@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Resume Preview</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <style>
       body {
         background: #f4f4f4;
@@ -219,6 +219,38 @@
         // otherwise add https://
         return "https://" + url;
       }
+      // ---------- format month-year helper ----------
+      function formatMonthYear(val) {
+        // Accepts "YYYY-MM" (from <input type="month">) or existing free-text like "Aug 2020"
+        if (!val) return "";
+        val = String(val).trim();
+        // Already "Mon YYYY"?
+        if (/^[A-Za-z]{3,}\s+\d{4}$/.test(val)) return val;
+        // ISO month format "YYYY-MM"
+        const m = val.match(/^(\d{4})-(\d{2})$/);
+        if (m) {
+          const y = m[1],
+            mm = m[2];
+          const months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+          const idx = parseInt(mm, 10) - 1;
+          if (idx >= 0 && idx < 12) return `${months[idx]} ${y}`;
+        }
+        // fallback: return raw
+        return val;
+      }
 
       function addSection(title, html) {
         if (html && html.trim()) {
@@ -316,9 +348,11 @@
       if (Array.isArray(data.education) && data.education.length) {
         const html = data.education
           .map((e) => {
+            const start = formatMonthYear(e.startDate);
+            const end = e.current ? "Present" : formatMonthYear(e.endDate);
             const period =
-              (e.startDate || "") +
-              (e.current ? " - Present" : e.endDate ? " - " + e.endDate : "");
+              start || end ? [start, end].filter(Boolean).join(" - ") : "";
+
             const score =
               e.score && e.scoreType
                 ? `${safe(e.scoreType)}: ${safe(e.score)}`
@@ -339,9 +373,11 @@
       if (Array.isArray(data.experience) && data.experience.length) {
         const html = data.experience
           .map((e) => {
+            const start = formatMonthYear(e.startDate);
+            const end = e.current ? "Present" : formatMonthYear(e.endDate);
             const period =
-              (e.startDate || "") +
-              (e.current ? " - Present" : e.endDate ? " - " + e.endDate : "");
+              start || end ? [start, end].filter(Boolean).join(" - ") : "";
+
             return `
         <p><strong>${safe(e.jobTitle || "")}</strong>, ${safe(
               e.company || ""
@@ -366,10 +402,11 @@
       if (Array.isArray(data.internships) && data.internships.length) {
         const html = data.internships
           .map((i) => {
+            const start = formatMonthYear(i.startDate);
+            const end = i.current ? "Present" : formatMonthYear(i.endDate);
             const period =
-              (i.startDate || "") +
-              " - " +
-              (i.current ? "Present" : i.endDate || "");
+              start || end ? [start, end].filter(Boolean).join(" - ") : "";
+
             return `
         <p><strong>${safe(i.name || "")}</strong>, ${safe(
               i.organization || ""
@@ -385,7 +422,11 @@
       if (Array.isArray(data.projects) && data.projects.length) {
         const html = data.projects
           .map((p) => {
-            const period = [p.startDate, p.endDate].filter(Boolean).join(" - ");
+            const start = formatMonthYear(p.startDate);
+            const end = formatMonthYear(p.endDate);
+            const period =
+              start || end ? [start, end].filter(Boolean).join(" - ") : "";
+
             return `
         <p>
           <strong>${safe(p.name || "")}</strong>

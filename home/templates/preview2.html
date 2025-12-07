@@ -542,6 +542,36 @@
           return u;
         return "https://" + u;
       }
+      // ---------- format month-year helper ----------
+      function formatMonthYear(val) {
+        if (!val) return "";
+        val = String(val).trim();
+        // already "Mon YYYY" like "Aug 2020"?
+        if (/^[A-Za-z]{3,}\s+\d{4}$/.test(val)) return val;
+        // ISO month format "YYYY-MM"
+        const m = val.match(/^(\d{4})-(\d{2})$/);
+        if (m) {
+          const y = m[1],
+            mm = m[2];
+          const months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+          const idx = parseInt(mm, 10) - 1;
+          if (idx >= 0 && idx < 12) return `${months[idx]} ${y}`;
+        }
+        return val; // fallback (raw)
+      }
 
       // try to convert image URL to dataURL (base64) to avoid CORS/tainted canvas
       async function imageUrlToDataUrl(url) {
@@ -846,9 +876,11 @@
             .map((e) => {
               const degree = safe(e.degree || "");
               const inst = safe(e.institution || e.school || "");
-              const meta = `${safe(e.startDate || "")}${
-                e.endDate ? " - " + safe(e.endDate) : ""
-              }`;
+              const start = formatMonthYear(e.startDate);
+              const end = e.current ? "Present" : formatMonthYear(e.endDate);
+              const meta =
+                start || end ? [start, end].filter(Boolean).join(" - ") : "";
+
               const desc = e.description
                 ? `<div style="margin-top:6px">${safe(e.description).replace(
                     /\n/g,
@@ -873,9 +905,11 @@
           return arr
             .map((e) => {
               const title = safe(e.jobTitle || e.title || "");
-              const meta = `${safe(e.startDate || "")}${
-                e.endDate ? " - " + safe(e.endDate) : ""
-              }`;
+              const start = formatMonthYear(e.startDate);
+              const end = e.current ? "Present" : formatMonthYear(e.endDate);
+              const meta =
+                start || end ? [start, end].filter(Boolean).join(" - ") : "";
+
               const company = safe(e.company || e.employer || "");
               const desc = e.description
                 ? `<div class="tl-desc">${safe(e.description).replace(
@@ -895,9 +929,11 @@
           return arr
             .map((p) => {
               const title = safe(p.name || p.title || "");
-              const meta = `${safe(p.startDate || "")}${
-                p.endDate ? " - " + safe(p.endDate) : ""
-              }`;
+              const start = formatMonthYear(p.startDate);
+              const end = formatMonthYear(p.endDate);
+              const meta =
+                start || end ? [start, end].filter(Boolean).join(" - ") : "";
+
               const desc = p.description
                 ? `<div class="tl-desc">${safe(p.description).replace(
                     /\n/g,
@@ -950,9 +986,11 @@
             .map((it) => {
               const title = safe(it.name || "");
               const org = safe(it.organization || it.company || "");
-              const meta = `${safe(it.startDate || "")}${
-                it.endDate ? " - " + safe(it.endDate) : ""
-              }`;
+              const start = formatMonthYear(it.startDate);
+              const end = it.current ? "Present" : formatMonthYear(it.endDate);
+              const meta =
+                start || end ? [start, end].filter(Boolean).join(" - ") : "";
+
               const desc = it.description
                 ? `<div class="tl-desc">${safe(it.description).replace(
                     /\n/g,
