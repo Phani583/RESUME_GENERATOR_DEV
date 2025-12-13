@@ -282,13 +282,16 @@
           <div class="panel-track" id="panelTrack">
             <!-- LOGIN PANEL -->
             <div class="panel">
-              <form id="loginForm" method="get" action="{% url 'home' %}">
+              <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="login" />
+
                 <label>Email Address</label>
                 <div class="input-wrap">
                   <i class="bx bxs-envelope icon"></i>
                   <input
                     type="email"
-                    id="emailLogin"
+                    name="email"
                     placeholder="you@example.com"
                     required
                   />
@@ -299,14 +302,18 @@
                   <i class="bx bxs-lock-alt icon"></i>
                   <input
                     type="password"
-                    id="passwordLogin"
+                    name="password"
                     placeholder="••••••••"
                     required
                   />
+
                   <button type="button" class="pwd-toggle" id="togglePwdLogin">
                     <i class="bx bx-hide"></i>
                   </button>
                 </div>
+                {% for message in messages %}
+                <p style="color: red; margin-top: 8px">{{ message }}</p>
+                {% endfor %}
 
                 <div class="forgot-row">
                   <div><input type="checkbox" /> Remember me</div>
@@ -328,22 +335,19 @@
 
             <!-- SIGNUP PANEL -->
             <div class="panel">
-              <form id="registerForm">
-                <label>User Name</label>
-                <div class="input-wrap">
-                  <i class="bx bxs-user icon"></i>
-                  <input
-                    type="text"
-                    id="fullname"
-                    placeholder="username"
-                    required
-                  />
-                </div>
+              <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="signup" />
 
                 <label style="margin-top: 10px">Phone Number</label>
                 <div class="input-wrap">
                   <i class="bx bxs-phone icon"></i>
-                  <input type="tel" id="phone" placeholder="+91 9876543210" />
+                  <input
+                    type="tel"
+                    name="phone"
+                    placeholder="+91 9876543210"
+                    required
+                  />
                 </div>
 
                 <label style="margin-top: 10px">Email</label>
@@ -351,7 +355,7 @@
                   <i class="bx bxs-envelope icon"></i>
                   <input
                     type="email"
-                    id="emailReg"
+                    name="email"
                     placeholder="you@example.com"
                     required
                   />
@@ -362,7 +366,7 @@
                   <i class="bx bxs-lock-alt icon"></i>
                   <input
                     type="password"
-                    id="passwordReg"
+                    name="password"
                     placeholder="Create a strong password"
                     required
                   />
@@ -373,7 +377,7 @@
                   <i class="bx bxs-lock-alt icon"></i>
                   <input
                     type="password"
-                    id="passwordRegConfirm"
+                    name="confirm_password"
                     placeholder="Confirm password"
                     required
                   />
@@ -389,6 +393,9 @@
                 <div class="divider">
                   <span>By creating an account you agree to our Terms</span>
                 </div>
+                {% for message in messages %}
+                <p style="color: red; margin-top: 8px">{{ message }}</p>
+                {% endfor %}
               </form>
             </div>
           </div>
