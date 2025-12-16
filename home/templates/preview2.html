@@ -1,31 +1,31 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Preview</title>
     <style>
       :root {
         --header-bg: #303645;
-        --sidebar-bg: #e9e9eb;
-        --accent: #2b33440;
+        --sidebar-bg: #8ff87f;
+        --accent: #2b3344;
         --muted: #6f7478;
         --line: #d9dfe3;
         --white: #ffffff;
-        --lline: #9bee8e;
-        --ssidebar-bg: linear-gradient(135deg, #9bee8e);
-        --hdwhite: #ffffff;
-        --hdblack: #010613d6;
-        --copilot-gradient: linear-gradient(360deg, #9bee8e);
       }
+
+      /* Reset / page */
       html,
       body {
         height: 100%;
-        margin: 0 120px 0 120px;
+        margin: 0;
         background: #f4f6f8;
         font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif;
         color: #222;
       }
+
+      /* Wrapper & controls */
       .wrap {
         max-width: 1100px;
         margin: 28px auto;
@@ -34,41 +34,50 @@
       }
       .controls {
         display: flex;
-        justify-content: flex-end;
+        justify-content: center;
         gap: 10px;
         margin-bottom: 14px;
       }
-      .controls button {
-        background: var(--header-bg);
-        color: #fff;
-        border: 0;
-        padding: 8px 12px;
-        border-radius: 8px;
-        cursor: pointer;
+      .actions {
+        margin: 20px auto;
+        text-align: center;
       }
+      .actions button {
+        margin: 0 6px;
+        padding: 10px 14px;
+      }
+
+      /* Resume container and header */
       .resume {
         background: var(--white);
         border-radius: 10px;
-        overflow: hidden;
+        overflow: visible; /* allow avatar overlap */
         box-shadow: 0 8px 30px rgba(10, 20, 30, 0.06);
         position: relative;
       }
+
+      /* Body layout (left fixed, right flexible) */
       .resume-body {
         display: flex;
         min-height: 840px;
         box-sizing: border-box;
       }
 
-      /* <-- DECREASED LEFT COLUMN WIDTH (was 280px) AND TIGHTENED PADDING */
+      /* Left column */
       .left-col {
-        width: 230px; /* changed from 280px -> 250px */
-        background: var(--copilot-gradient);
-        padding: 168px 28px 36px 26px; /* slightly reduced padding */
-        border-right: 1px solid var(--lline);
+        width: 230px; /* keep identical for PDF math */
+        background: var(--sidebar-bg);
+        padding: 110px 18px 36px 24px; /* top padding for avatar overlap */
+        border-right: 1px solid var(--line);
         box-sizing: border-box;
         position: relative;
-      }
+        z-index: 2;
 
+        /* ensure long words wrap in the narrow left column */
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+      }
       .avatar {
         width: 150px;
         height: 150px;
@@ -77,9 +86,10 @@
         overflow: hidden;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
         position: absolute;
-        left: 20px; /* moved slightly left to match reduced column */
-        top: 15px;
+        left: 20px;
+        top: 10px;
         background: var(--white);
+        z-index: 10;
       }
       .avatar img {
         width: 100%;
@@ -87,25 +97,30 @@
         object-fit: cover;
         display: block;
       }
+
       .left-col h1 {
         font-size: 18px;
         margin: 12px 0 4px;
-        color: var(--lline);
+        color: var(--accent);
         font-weight: 700;
       }
       .left-col .role-small {
         font-size: 13px;
-        color: var(--lline);
+        color: var(--muted);
         margin-bottom: 10px;
       }
+
+      /* Section titles */
       .section-title {
-        margin-top: 22px;
+        margin-top: 82px;
         margin-bottom: 8px;
         font-weight: 800;
         color: var(--accent);
         letter-spacing: 0.06em;
         font-size: 15px;
       }
+
+      /* Contact list */
       .contact-list {
         list-style: none;
         padding: 0;
@@ -124,26 +139,36 @@
         color: var(--accent);
         font-size: 13px;
       }
-      .skills-list {
-        padding-left: 18px;
-        margin-top: 6px;
+      /* make contact values wrap safely */
+      .contact-list li div,
+      .contact-list li div a {
+        display: block;
+        max-width: 100%;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+        line-height: 1.4;
       }
-      .skills-list li {
-        margin-bottom: 8px;
+
+      /* Right column */
+      .right-col {
+        flex: 1;
+        padding: 28px 48px; /* adjusted to match target screenshot spacing */
+        background: var(--white);
+        box-sizing: border-box;
+
+        /* ensure long words wrap and do not overflow the right column */
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+
+        /* main text color matching screenshot */
         color: #333;
       }
 
-      /* <-- RIGHT COLUMN: reduced left/right padding so it visually stretches more -->
-         Flex already makes it fill remaining space; reducing the padding gives more usable width. */
-      .right-col {
-        flex: 1;
-        padding: 15px 20px; /* reduced horizontal padding from 56px -> 40px */
-        background: var(--white);
-        box-sizing: border-box;
-      }
-
+      /* Blocks and headings */
       .block {
-        margin-bottom: 28px;
+        margin-bottom: 20px;
       }
       .block h2 {
         display: flex;
@@ -151,47 +176,34 @@
         gap: 12px;
         margin: 0 0 12px;
         font-size: 18px;
-        color: var(--accent);
+        color: #2b3344; /* slightly navy heading (matches screenshot) */
         font-weight: 800;
       }
+
+      /* Profile text */
       .profile-text {
         color: #333;
         line-height: 1.7;
-      }
-      .resume-header {
-        background: var(--hdwhite);
-        padding: 28px 10px 34px;
-        text-align: center;
-        color: var(--hdblack);
-      }
-      .resume-header .name {
-        font-size: 45px;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        margin: 0;
-        text-transform: uppercase;
-      }
-      .resume-header .subtitle {
-        margin-top: 10px;
-        font-size: 15px;
-        opacity: 0.95;
-        font-weight: 400;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
 
+      /* Timeline / Experience */
       .tl-item {
         position: relative;
         padding: 10px 0 14px;
       }
       .timeline {
         position: relative;
-        padding-left: 0; /* remove extra left padding now that line is gone */
+        padding-left: 0;
         margin-left: 0;
       }
-      /* hide the vertical line */
       .timeline::before {
         display: none;
       }
-      /* hide the round marker */
       .tl-item::before {
         display: none;
       }
@@ -200,11 +212,13 @@
         font-weight: 700;
         margin: 0 0 6px;
         font-size: 16px;
+        color: #2b3344;
       }
       .tl-meta {
         float: right;
         color: var(--muted);
         font-weight: 700;
+        font-size: 13px;
       }
       .tl-company {
         color: var(--muted);
@@ -213,7 +227,12 @@
       .tl-desc {
         color: #333;
         line-height: 1.6;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
       }
+
+      /* Education */
       .edu-item {
         margin-bottom: 12px;
       }
@@ -224,18 +243,157 @@
       .edu-date {
         float: right;
         color: var(--muted);
-        font-weight: 700; /* matches .tl-meta from experience */
-        font-size: 16px; /* same thickness / size as experience */
+        font-weight: 700;
+        font-size: 16px;
         letter-spacing: 0.3px;
       }
       .edu-item {
-        margin-bottom: 18px; /* better spacing like experience */
+        margin-bottom: 18px;
       }
 
+      /* Skills & lists — restore bullets and color */
+      .skills-list {
+        list-style: disc !important;
+        padding-left: 20px !important;
+        margin: 6px 0;
+      }
+      .skills-list li {
+        margin: 6px 0;
+        font-size: 14px;
+        color: #333;
+      }
+      .skills-list li strong {
+        display: inline-block;
+        margin-right: 8px;
+        color: var(--accent);
+        font-weight: 800;
+        font-size: 13px;
+      }
+
+      /* Left column specific skills list tweak (to match screenshot) */
+      .left-col .skills-list {
+        list-style: disc !important;
+        padding-left: 22px !important;
+        margin-top: 8px;
+      }
+      .left-col .skills-list li {
+        color: #333;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+      }
+
+      /* Utility pills & list item styling */
+      .pill {
+        display: inline-block;
+        margin: 6px 6px 6px 0;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(43, 51, 68, 0.06);
+        font-size: 13px;
+        color: var(--accent);
+        text-decoration: none;
+        line-height: 1;
+      }
+      .list-item {
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
+      }
+      .list-item-title {
+        font-weight: 700;
+        margin: 0 0 6px;
+        font-size: 15px;
+        color: var(--accent);
+      }
+
+      /* Additional & declaration text */
+      .right-col .block div {
+        color: #333;
+        line-height: 1.6;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .right-col .block h2 {
+        margin-bottom: 8px;
+      }
+      /* === Multiline text spacing enhancement (SCREEN + PDF SAFE) ===
+
+      /* Generic text blocks */
+      .profile-text,
+      .tl-desc,
+      .right-col .block div,
+      .left-col li,
+      .right-col li {
+        padding-bottom: 6px; /* space after multiline text */
+      }
+
+      /* Experience / project / certification items */
+      .tl-item {
+        padding-bottom: 10px; /* visual gap between items */
+      }
+
+      /* Education blocks */
+      .edu-item {
+        padding-bottom: 10px;
+      }
+
+      /* Lists: ensure spacing even when text wraps */
+      .skills-list li {
+        padding-bottom: 4px;
+        line-height: 1.6;
+      }
+
+      /* Contact values (email, links, address) */
+      .contact-list li div {
+        padding-bottom: 4px;
+      }
+      */
+      /* =====================================================
+   Line spacing + paragraph spacing (SCREEN + PDF SAFE)
+   ===================================================== */
+
+      /* Global readable line spacing */
+      .profile-text,
+      .tl-desc,
+      .right-col .block div,
+      .left-col li,
+      .right-col li,
+      .contact-list li div {
+        line-height: 1.7; /* LINE SPACING */
+      }
+
+      /* Paragraph / block spacing (only after multiline text) */
+      .profile-text,
+      .tl-desc,
+      .right-col .block div {
+        padding-bottom: 10px; /* PARAGRAPH SPACING */
+      }
+
+      /* Experience / project items */
+      .tl-item {
+        padding-bottom: 14px;
+      }
+
+      /* Education blocks */
+      .edu-item {
+        padding-bottom: 14px;
+      }
+
+      /* Lists spacing */
+      .skills-list li {
+        line-height: 1.6;
+        padding-bottom: 6px;
+      }
+
+      /* Contact section spacing */
+      .contact-list li {
+        padding-bottom: 6px;
+      }
+
+      /* Responsive adjustments */
       @media (max-width: 900px) {
-        .resume-header .name {
-          font-size: 28px;
-        }
         .left-col {
           width: 100%;
           padding: 24px;
@@ -253,7 +411,14 @@
         .right-col {
           padding: 20px;
         }
+        .pill {
+          margin: 6px 4px 6px 0;
+          padding: 5px 8px;
+          font-size: 12px;
+        }
       }
+
+      /* Print/PDF rules (no layout changes) */
       .tl-item,
       .timeline,
       .edu-item,
@@ -263,29 +428,24 @@
         -webkit-column-break-inside: avoid;
         -moz-column-break-inside: avoid;
       }
-      /* ------------------ Print / PDF fixes (append this) ------------------ */
-      /* ------------------ Print / PDF fixes (stronger) ------------------ */
-      /* --- Minimal print rules: do NOT alter layout; keep preview appearance --- */
       @page {
         size: A4;
         margin: 0;
       }
 
       @media print {
-        /* keep colors visible but don't change layout */
+        .force-new-page {
+          page-break-before: always !important;
+          break-before: page !important;
+        }
         * {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
-
-        /* hide UI buttons in print */
         .controls,
-        #pdfBtn,
-        #txtBtn {
+        #pdfBtn {
           display: none !important;
         }
-
-        /* keep page-break rules but don't force widths/positions */
         .tl-item,
         .timeline,
         .edu-item,
@@ -293,226 +453,51 @@
           break-inside: avoid !important;
           page-break-inside: avoid !important;
         }
-
-        /* make sure resume element is visible for screen-capture style rendering */
         .resume {
           background-clip: padding-box !important;
           overflow: visible !important;
         }
-      }
-
-      /* ====== Added/Enhanced styles for Preview4 (paste at end of your CSS) ====== */
-
-      /* small utility */
-      .muted {
-        color: var(--muted);
-        font-size: 13px;
-      }
-
-      /* Pills used for links and small metadata */
-      .pill {
-        display: inline-block;
-        margin: 6px 6px 6px 0;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: rgba(43, 51, 68, 0.06);
-        font-size: 13px;
-        color: var(--accent);
-        text-decoration: none;
-        line-height: 1;
-      }
-      .pill a {
-        color: inherit;
-        text-decoration: none;
-      }
-      .pill:hover {
-        background: rgba(43, 51, 68, 0.1);
-      }
-
-      /* Generic list item used for projects/certs/skills */
-      .list-item {
-        margin-bottom: 12px;
-        padding-bottom: 6px;
-        border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
-      }
-      .list-item-title {
-        font-weight: 700;
-        margin: 0 0 6px;
-        font-size: 15px;
-        color: var(--accent);
-      }
-      .list-item .muted {
-        display: block;
-        margin-top: 4px;
-      }
-
-      /* Skills list: show category when present and lightly emphasise level */
-      .skills-list {
-        list-style: none;
-        padding: 0 0 0 12px;
-        margin: 6px 0;
-      }
-      .skills-list li {
-        margin: 6px 0;
-        font-size: 14px;
-        color: #2e3336;
-      }
-      .skills-list li strong {
-        display: inline-block;
-        margin-right: 8px;
-        color: var(--accent);
-        font-weight: 800;
-        font-size: 13px;
-      }
-
-      /* Timeline / experience / project small tweaks */
-      .tl-item {
-        padding: 10px 0;
-      }
-      .tl-title {
-        font-weight: 700;
-        font-size: 16px;
-        margin: 0 0 6px;
-      }
-      .tl-meta {
-        float: right;
-        color: var(--muted);
-        font-weight: 700;
-        font-size: 13px;
-      }
-      .tl-company {
-        color: var(--muted);
-        margin-bottom: 8px;
-      }
-      .tl-desc {
-        color: #333;
-        line-height: 1.6;
-      }
-
-      /* Education scoring row (CGPA / Marks / Grade) */
-      .edu-item .muted {
-        margin-top: 6px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-      .edu-item .score-pill {
-        display: inline-block;
-        margin-top: 6px;
-        padding: 6px 8px;
-        border-radius: 6px;
-        background: rgba(43, 51, 68, 0.04);
-        font-size: 13px;
-        color: var(--accent);
-      }
-
-      /* Contact list rows (make links clickable but compact) */
-      .contact-list a {
-        color: var(--accent);
-        text-decoration: none;
-      }
-      .contact-list a:hover {
-        text-decoration: underline;
-      }
-
-      /* Projects / Certifications / Internships wrappers */
-      .right-col .block .tl-item + .tl-item {
-        margin-top: 8px;
-      }
-
-      /* Achievements rendered as bullets (re-use skills-list styles) */
-      .block ul.skills-list {
-        margin: 6px 0 5px 12px;
-      }
-
-      /* Additional & declaration text */
-      .right-col .block div {
-        color: #333;
-        line-height: 1.4;
-        font-size: 18px;
-      }
-      .right-col .block h2 {
-        margin-bottom: 8px;
-      }
-
-      /* Responsive & print-safe adjustments (complementing existing rules) */
-      @media (max-width: 900px) {
-        .pill {
-          margin: 6px 4px 6px 0;
-          padding: 5px 8px;
-          font-size: 12px;
-        }
-        .left-col {
-          padding: 18px;
-        }
-        .avatar {
-          left: calc(50% - 75px);
-          top: -65px;
-        }
-      }
-
-      /* print refinements: ensure thin separators remain subtle on paper */
-      @media print {
         .pill {
           background: transparent;
-          border: 1px solid #9bee8e;
+          border: 1px solid #eee;
           color: #111;
         }
         .contact-list li {
-          border-bottom: 1px dashed #9bee8e;
-        }
-        .list-item {
-          border-bottom: 1px dashed #9bee8e;
-          page-break-inside: avoid;
+          border-bottom: 1px dashed #eee;
         }
       }
 
-      /* Enable bullet points for Skills, Languages, Hobbies */
-      .left-col .skills-list {
-        list-style: disc !important; /* show normal round bullets */
-        padding-left: 20px !important; /* spacing for bullets */
-        margin-top: 6px;
-      }
-
-      .left-col .skills-list li {
-        margin-bottom: 6px;
-      }
-
-      /* Fix long contact links overflowing */
-      .contact-list li div,
-      .contact-list li div a {
-        display: block;
+      /* Safety: hard-limits to avoid overflow in extreme cases */
+      .resume,
+      .right-col,
+      .left-col {
         max-width: 100%;
-        white-space: normal !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-        line-height: 1.4;
+        box-sizing: border-box;
       }
-
-      /* Desktop preview unchanged — this only affects printing output */
-    </style>
-    <style>
-      .actions {
-        margin: 20px auto;
-        text-align: center;
-      }
-      .actions button {
-        margin: 0 6px;
-        padding: 10px 14px;
+      #pdfBtn {
+        font-size: 20px;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 10px;
       }
     </style>
   </head>
+
   <body>
-    <div class="actions">
-      <button id="pdfBtn">Download PDF</button>
+    <div class="wrap">
+      <div class="controls">
+        <button id="pdfBtn">Download PDF</button>
+      </div>
+
+      <div id="resumeRoot" class="resume" aria-live="polite"></div>
     </div>
 
-    <div id="resumeRoot" class="resume" aria-live="polite"></div>
-    <!--jscode now onwards-->
     <script>
-      const DEFAULT_PHOTO =
-        "/mnt/data/6e80851d-4cca-4dc0-bf0c-7ac1293103ca.png"; // <-- use your uploaded path
-      const LOCAL_STORAGE_KEY = "resumeData"; // your data key
-      // ---------------- helpers ----------------
+      // ---------- Config & helpers (unchanged from robust version) ----------
+      //  const DEFAULT_PHOTO =
+      // "/mnt/data/6e80851d-4cca-4dc0-bf0c-7ac1293103ca.png";
+      const LOCAL_STORAGE_KEY = "resumeData";
+
       function log(...args) {
         console.log("[resume-pdf]", ...args);
       }
@@ -542,17 +527,16 @@
           return u;
         return "https://" + u;
       }
-      // ---------- format month-year helper ----------
       function formatMonthYear(val) {
         if (!val) return "";
         val = String(val).trim();
-        // already "Mon YYYY" like "Aug 2020"?
+        // already "Aug 2020"
         if (/^[A-Za-z]{3,}\s+\d{4}$/.test(val)) return val;
-        // ISO month format "YYYY-MM"
+        // YYYY-MM
         const m = val.match(/^(\d{4})-(\d{2})$/);
         if (m) {
-          const y = m[1],
-            mm = m[2];
+          const y = m[1];
+          const mm = parseInt(m[2], 10);
           const months = [
             "Jan",
             "Feb",
@@ -567,17 +551,40 @@
             "Nov",
             "Dec",
           ];
-          const idx = parseInt(mm, 10) - 1;
-          if (idx >= 0 && idx < 12) return `${months[idx]} ${y}`;
+          return (months[mm - 1] || "") + " " + y;
         }
-        return val; // fallback (raw)
+        // fallback: return as-is
+        return val;
       }
 
-      // try to convert image URL to dataURL (base64) to avoid CORS/tainted canvas
+      // find element by selector + contained text (replaces :contains)
+      function querySelectorByText(selector, text, { exact = false } = {}) {
+        try {
+          const nodes = Array.from(document.querySelectorAll(selector || ""));
+          if (exact)
+            return (
+              nodes.find((n) => (n.textContent || "").trim() === text) || null
+            );
+          return (
+            nodes.find((n) => (n.textContent || "").includes(text)) || null
+          );
+        } catch (e) {
+          console.error("querySelectorByText failed", e, selector, text);
+          return null;
+        }
+      }
+
+      // convert image to dataURL (best-effort)
       async function imageUrlToDataUrl(url) {
         try {
           if (!url) return "";
           if (url.startsWith("data:")) return url;
+          if (location.protocol === "file:") {
+            log(
+              "Running from file:// — skipping image fetch to avoid CORS issues"
+            );
+            return url;
+          }
           const resp = await fetch(url, { mode: "cors" });
           if (!resp.ok) throw new Error("image fetch failed: " + resp.status);
           const blob = await resp.blob();
@@ -593,205 +600,120 @@
         }
       }
 
-      function ensureHtml2Pdf() {
-        // Loads html2canvas, jspdf and html2pdf.bundle in sequence and resolves when available on window.
-        return new Promise((resolve, reject) => {
-          // already loaded?
-          if (
-            window.html2pdf &&
-            (window.html2canvas || window.html2pdf.html2canvas) &&
-            (window.jspdf ||
-              window.jsPDF ||
-              (window.html2pdf && window.html2pdf.jsPDF))
-          ) {
-            // normalize references
-            if (
-              !window.html2canvas &&
-              window.html2pdf &&
-              window.html2pdf.html2canvas
-            ) {
-              window.html2canvas = window.html2pdf.html2canvas;
-            }
-            if (!window.jsPDF && window.jspdf && window.jspdf.jsPDF) {
-              window.jsPDF = window.jspdf.jsPDF;
-            }
-            if (!window.jsPDF && window.html2pdf && window.html2pdf.jsPDF) {
-              window.jsPDF = window.html2pdf.jsPDF;
-            }
-            return resolve(window.html2pdf);
-          }
-
-          // helper to inject script and wait
-          function loadScript(src, globalCheckFn) {
-            return new Promise((res, rej) => {
-              // if already present, resolve
-              try {
-                if (globalCheckFn && globalCheckFn()) return res();
-              } catch (e) {
-                /* ignore */
-              }
-
-              const s = document.createElement("script");
-              s.src = src;
-              s.async = true;
-              s.onload = () => {
-                // small delay to let UMD attach to window
-                setTimeout(() => {
-                  if (globalCheckFn && !globalCheckFn()) {
-                    // even though loaded, the expected global didn't attach
-                    console.warn(
-                      "script loaded but global check failed for",
-                      src
-                    );
-                  }
-                  res();
-                }, 30);
-              };
-              s.onerror = () => rej(new Error("Failed to load " + src));
-              document.head.appendChild(s);
-            });
-          }
-
-          (async () => {
-            try {
-              // 1) html2canvas (explicit)
-              if (!window.html2canvas) {
-                await loadScript(
-                  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
-                  () => !!window.html2canvas
-                );
-              }
-
-              // 2) jsPDF (UMD build)
-              if (
-                !window.jsPDF &&
-                !(window.jspdf && window.jspdf.jsPDF) &&
-                !window.jsPDF
-              ) {
-                await loadScript(
-                  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
-                  () => !!(window.jspdf && window.jspdf.jsPDF) || !!window.jsPDF
-                );
-                // Normalise export (UMD attaches window.jspdf)
-                if (window.jspdf && window.jspdf.jsPDF && !window.jsPDF) {
-                  window.jsPDF = window.jspdf.jsPDF;
-                  // also set legacy alias
-                  window.jspdf = window.jspdf;
-                  window.jsPDF = window.jspdf.jsPDF;
-                }
-                if (
-                  !window.jsPDF &&
-                  window.jsPDF === undefined &&
-                  window.jspdf &&
-                  window.jspdf.jsPDF
-                ) {
-                  window.jsPDF = window.jspdf.jsPDF;
-                }
-              }
-
-              // 3) html2pdf bundle (last)
-              if (!window.html2pdf) {
-                await loadScript(
-                  "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js",
-                  () => !!window.html2pdf
-                );
-              }
-
-              // Post-load normalization: make sure html2canvas and jsPDF are reachable at expected names
-              if (
-                !window.html2canvas &&
-                window.html2pdf &&
-                window.html2pdf.html2canvas
-              ) {
-                window.html2canvas = window.html2pdf.html2canvas;
-              }
-              if (!window.jsPDF) {
-                if (window.jspdf && window.jspdf.jsPDF)
-                  window.jsPDF = window.jspdf.jsPDF;
-                if (window.html2pdf && window.html2pdf.jsPDF)
-                  window.jsPDF = window.html2pdf.jsPDF;
-              }
-
-              // Final check
-              if (!window.html2pdf)
-                return reject(new Error("html2pdf failed to load"));
-              if (!window.html2canvas && !window.html2pdf.html2canvas) {
-                console.warn(
-                  "html2canvas not found on window after load; trying to continue."
-                );
-              }
-              // resolve with window.html2pdf (most handlers expect that)
-              resolve(window.html2pdf);
-            } catch (err) {
-              reject(err);
-            }
-          })();
+      function loadScript(src, globalCheckFn, timeoutMs = 12000) {
+        return new Promise((res, rej) => {
+          try {
+            if (globalCheckFn && globalCheckFn()) return res();
+          } catch (e) {}
+          const s = document.createElement("script");
+          s.src = src;
+          s.async = true;
+          let done = false;
+          const to = setTimeout(() => {
+            if (done) return;
+            done = true;
+            rej(new Error("Loading script timed out: " + src));
+          }, timeoutMs);
+          s.onload = () => {
+            if (done) return;
+            done = true;
+            clearTimeout(to);
+            setTimeout(res, 30);
+          };
+          s.onerror = () => {
+            if (done) return;
+            done = true;
+            clearTimeout(to);
+            rej(new Error("Failed to load " + src));
+          };
+          document.head.appendChild(s);
         });
       }
 
-      (function renderPreview() {
-        // read saved data exactly as your main script writes it
-        const data = JSON.parse(localStorage.getItem("resumeData") || "{}");
-        const pi = data.personalInfo || {};
-        const pl = data.publicLinks || {}; // object: { github, linkedin, portfolio, website, custom: [] }
+      async function ensureHtml2Pdf() {
+        if (
+          window.html2pdf &&
+          (window.html2canvas || window.html2pdf.html2canvas) &&
+          (window.jspdf ||
+            window.jsPDF ||
+            (window.html2pdf && window.html2pdf.jsPDF))
+        ) {
+          if (
+            !window.html2canvas &&
+            window.html2pdf &&
+            window.html2pdf.html2canvas
+          )
+            window.html2canvas = window.html2pdf.html2canvas;
+          if (!window.jsPDF && window.jspdf && window.jspdf.jsPDF)
+            window.jsPDF = window.jspdf.jsPDF;
+          if (!window.jsPDF && window.html2pdf && window.html2pdf.jsPDF)
+            window.jsPDF = window.html2pdf.jsPDF;
+          return window.html2pdf;
+        }
+        // try load libs from CDN (gracefully)
+        await loadScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+          () => !!window.html2canvas
+        ).catch((e) => log("html2canvas load warning:", e));
+        await loadScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+          () => !!(window.jspdf && window.jspdf.jsPDF) || !!window.jsPDF
+        ).catch((e) => log("jsPDF load warning:", e));
+        await loadScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js",
+          () => !!window.html2pdf
+        ).catch((e) => log("html2pdf load warning:", e));
+        if (
+          !window.html2canvas &&
+          window.html2pdf &&
+          window.html2pdf.html2canvas
+        )
+          window.html2canvas = window.html2pdf.html2canvas;
+        if (!window.jsPDF) {
+          if (window.jspdf && window.jspdf.jsPDF)
+            window.jsPDF = window.jspdf.jsPDF;
+          if (window.html2pdf && window.html2pdf.jsPDF)
+            window.jsPDF = window.html2pdf.jsPDF;
+        }
+        if (!window.html2pdf) throw new Error("html2pdf failed to load");
+        return window.html2pdf;
+      }
 
-        // pick photo (support base64 or URL)
-        const DEFAULT_PHOTO =
-          "/mnt/data/6e80851d-4cca-4dc0-bf0c-7ac1293103ca.png";
+      // ---------------- render resume preview ----------------
+      // ---------------- render resume preview (REPLACEMENT: only render non-empty fields) ----------------
+      (function renderPreview() {
+        const data = JSON.parse(
+          localStorage.getItem(LOCAL_STORAGE_KEY) || "{}"
+        );
+        const pi = data.personalInfo || {};
+        const pl = data.publicLinks || {};
+        // If no photo → keep empty (do not show avatar)
         const photo =
           pi.profilePhoto && pi.profilePhoto.trim()
-            ? pi.profilePhoto
-            : DEFAULT_PHOTO;
+            ? pi.profilePhoto.trim()
+            : "";
 
-        // small helpers
-        function safe(s = "") {
-          return String(s || "").replace(
-            /[&<>"']/g,
-            (c) =>
-              ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#039;",
-              }[c])
-          );
-        }
-        function normalizeUrl(u) {
-          if (!u) return "";
-          u = String(u).trim();
-          if (
-            u.startsWith("/") ||
-            u.startsWith("http://") ||
-            u.startsWith("https://") ||
-            u.startsWith("data:") ||
-            u.startsWith("blob:")
-          )
-            return u;
-          return "https://" + u;
-        }
-        function emptyNodeHtml(msg = "") {
-          return `<div style="color:var(--muted)">${msg || "—"}</div>`;
+        // helper: return empty string when nothing to show
+        function emptyNodeHtml() {
+          return ""; // <-- important: show nothing when empty
         }
 
-        // Build contact list (includes all regular links plus custom links)
+        // Contact builder: returns '' if no contact items
         function buildContact(pi, pl) {
           const items = [];
-
-          if (pi.email)
+          if (pi && pi.email)
             items.push(
               `<li><strong>EMAIL</strong><div>${safe(pi.email)}</div></li>`
             );
-          if (pi.phone)
+          if (pi && pi.phone)
             items.push(
               `<li><strong>PHONE</strong><div>${safe(pi.phone)}</div></li>`
             );
-          if (pi.location)
+          if (pi && pi.location)
             items.push(
               `<li><strong>ADDRESS</strong><div>${safe(pi.location)}</div></li>`
             );
 
-          // standard links (if provided)
           ["website", "portfolio", "github", "linkedin"].forEach((k) => {
             if (pl && pl[k]) {
               const url = normalizeUrl(pl[k]);
@@ -805,8 +727,7 @@
             }
           });
 
-          // custom links array: [{name,url}]
-          if (Array.isArray(pl.custom) && pl.custom.length) {
+          if (Array.isArray(pl && pl.custom) && pl.custom.length) {
             pl.custom.forEach((c) => {
               if (c && (c.name || c.url)) {
                 const label = safe(c.name || c.title || "Link");
@@ -824,91 +745,59 @@
             });
           }
 
-          if (!items.length)
-            return '<ul class="contact-list"><li class="small">No contact info</li></ul>';
+          if (!items.length) return ""; // nothing to show
           return '<ul class="contact-list">' + items.join("") + "</ul>";
         }
 
-        // Generic list renderer for left-column lists (skills, languages, hobbies)
+        // generic list renderer — returns '' when empty
         function listify(arr, opts = {}) {
-          if (!Array.isArray(arr) || !arr.length)
-            return `<ul class="${
-              opts.cls || "skills-list"
-            }"><li class="small">—</li></ul>`;
-          const items = arr
-            .map((item) => {
-              if (typeof item === "string") return `<li>${safe(item)}</li>`;
-              // item is object
-              if (opts.type === "languages") {
-                const name = safe(item.name || item.language || "");
-                const lvl = item.level
-                  ? ` <span class="muted">(${safe(item.level)})</span>`
-                  : "";
-                return `<li>${name}${lvl}</li>`;
-              }
-              if (opts.type === "skills") {
-                const name = `<strong>${safe(
-                  item.name || item.skill || ""
-                )}</strong>`;
-                const cat = item.category
-                  ? ` <span class="muted"><br>(${safe(item.category)})</span>`
-                  : "";
-                const lvl = item.level
-                  ? ` <span class="muted"> <br>${safe(item.level)}</span>`
-                  : "";
-                return `<li>${name}${cat}${lvl}</li>`;
-              }
-
-              // default
-              return `<li>${safe(
-                item.name || item.hobby || item.title || ""
-              )}</li>`;
-            })
-            .join("");
-          return `<ul class="${opts.cls || "skills-list"}">${items}</ul>`;
+          if (!Array.isArray(arr) || !arr.length) return ""; // nothing
+          return (
+            `<ul class="${opts.cls || "skills-list"}">` +
+            arr
+              .map((item) => {
+                if (typeof item === "string") return `<li>${safe(item)}</li>`;
+                if (opts.type === "languages") {
+                  const name = safe(item.name || item.language || "");
+                  const lvl = item.level
+                    ? ` <span class="muted">(${safe(item.level)})</span>`
+                    : "";
+                  return `<li>${name}${lvl}</li>`;
+                }
+                if (opts.type === "skills") {
+                  const name = `<strong>${safe(
+                    item.name || item.skill || ""
+                  )}</strong>`;
+                  const cat = item.category
+                    ? ` <span class="muted"><br>(${safe(item.category)})</span>`
+                    : "";
+                  const lvl = item.level
+                    ? ` <span class="muted"> <br>${safe(item.level)}</span>`
+                    : "";
+                  return `<li>${name}${cat}${lvl}</li>`;
+                }
+                return `<li>${safe(
+                  item.name || item.hobby || item.title || ""
+                )}</li>`;
+              })
+              .join("") +
+            `</ul>`
+          );
         }
 
-        // Education builder — use score + scoreType from your form
-        function buildEducation(arr) {
-          if (!Array.isArray(arr) || !arr.length)
-            return emptyNodeHtml("No education added");
-          return arr
-            .map((e) => {
-              const degree = safe(e.degree || "");
-              const inst = safe(e.institution || e.school || "");
-              const start = formatMonthYear(e.startDate);
-              const end = e.current ? "Present" : formatMonthYear(e.endDate);
-              const meta =
-                start || end ? [start, end].filter(Boolean).join(" - ") : "";
-
-              const desc = e.description
-                ? `<div style="margin-top:6px">${safe(e.description).replace(
-                    /\n/g,
-                    "<br>"
-                  )}</div>`
-                : "";
-              // score + type
-              const score = e.score
-                ? `<div class="muted">${safe(e.scoreType || "")}: ${safe(
-                    e.score
-                  )}</div>`
-                : "";
-              return `<div class="edu-item"><p style="margin:0;font-weight:700">${degree}</p><div class="meta">${inst}<span class="edu-date">${meta}</span></div>${desc}${score}</div>`;
-            })
-            .join("");
-        }
-
-        // Experience builder
+        // Experience / project / education builders: return '' when empty
         function buildExperience(arr) {
-          if (!Array.isArray(arr) || !arr.length)
-            return emptyNodeHtml("No experience added");
+          if (!Array.isArray(arr) || !arr.length) return "";
           return arr
             .map((e) => {
               const title = safe(e.jobTitle || e.title || "");
-              const start = formatMonthYear(e.startDate);
-              const end = e.current ? "Present" : formatMonthYear(e.endDate);
-              const meta =
-                start || end ? [start, end].filter(Boolean).join(" - ") : "";
+              const meta = `${formatMonthYear(e.startDate)}${
+                e.current
+                  ? " - Present"
+                  : e.endDate
+                  ? " - " + formatMonthYear(e.endDate)
+                  : ""
+              }`;
 
               const company = safe(e.company || e.employer || "");
               const desc = e.description
@@ -922,17 +811,48 @@
             .join("");
         }
 
-        // Projects (data.projects uses {name, description, startDate, endDate, projectUrl})
+        function buildEducation(arr) {
+          if (!Array.isArray(arr) || !arr.length) return "";
+          return arr
+            .map((e) => {
+              const degree = safe(e.degree || "");
+              const inst = safe(e.institution || e.school || "");
+              const meta = `${formatMonthYear(e.startDate)}${
+                e.current
+                  ? " - Present"
+                  : e.endDate
+                  ? " - " + formatMonthYear(e.endDate)
+                  : ""
+              }`;
+
+              const desc = e.description
+                ? `<div style="margin-top:6px">${safe(e.description).replace(
+                    /\n/g,
+                    "<br>"
+                  )}</div>`
+                : "";
+              const score = e.score
+                ? `<div class="muted">${safe(e.scoreType || "")}: ${safe(
+                    e.score
+                  )}</div>`
+                : "";
+              return `<div class="edu-item"><p style="margin:0;font-weight:700">${degree}</p><div class="meta">${inst}<span class="edu-date">${meta}</span></div>${desc}${score}</div>`;
+            })
+            .join("");
+        }
+
         function buildProjects(arr) {
-          if (!Array.isArray(arr) || !arr.length)
-            return emptyNodeHtml("No projects added");
+          if (!Array.isArray(arr) || !arr.length) return "";
           return arr
             .map((p) => {
               const title = safe(p.name || p.title || "");
-              const start = formatMonthYear(p.startDate);
-              const end = formatMonthYear(p.endDate);
-              const meta =
-                start || end ? [start, end].filter(Boolean).join(" - ") : "";
+              const meta = `${formatMonthYear(p.startDate)}${
+                p.current
+                  ? " - Present"
+                  : p.endDate
+                  ? " - " + formatMonthYear(p.endDate)
+                  : ""
+              }`;
 
               const desc = p.description
                 ? `<div class="tl-desc">${safe(p.description).replace(
@@ -952,10 +872,8 @@
             .join("");
         }
 
-        // Certifications
         function buildCertifications(arr) {
-          if (!Array.isArray(arr) || !arr.length)
-            return emptyNodeHtml("No certifications added");
+          if (!Array.isArray(arr) || !arr.length) return "";
           return arr
             .map((c) => {
               const title = safe(c.name || "");
@@ -978,18 +896,19 @@
             .join("");
         }
 
-        // Internships
         function buildInternships(arr) {
-          if (!Array.isArray(arr) || !arr.length)
-            return emptyNodeHtml("No internships added");
+          if (!Array.isArray(arr) || !arr.length) return "";
           return arr
             .map((it) => {
               const title = safe(it.name || "");
               const org = safe(it.organization || it.company || "");
-              const start = formatMonthYear(it.startDate);
-              const end = it.current ? "Present" : formatMonthYear(it.endDate);
-              const meta =
-                start || end ? [start, end].filter(Boolean).join(" - ") : "";
+              const meta = `${formatMonthYear(it.startDate)}${
+                it.current
+                  ? " - Present"
+                  : it.endDate
+                  ? " - " + formatMonthYear(it.endDate)
+                  : ""
+              }`;
 
               const desc = it.description
                 ? `<div class="tl-desc">${safe(it.description).replace(
@@ -1002,191 +921,165 @@
             .join("");
         }
 
-        // Achievements — support strings or objects like { achievement: "..."} or { text: "..." }
         function buildAchievements(arr) {
-          if (!Array.isArray(arr) || !arr.length)
-            return emptyNodeHtml("No achievements added");
-          const items = arr
-            .map((a) => {
-              if (!a) return "";
-              if (typeof a === "string") return `<li>${safe(a)}</li>`;
-              if (a.achievement) return `<li>${safe(a.achievement)}</li>`;
-              if (a.text) return `<li>${safe(a.text)}</li>`;
-              // fallback: try common props
-              return `<li>${safe(a.title || a.name || "")}</li>`;
-            })
-            .join("");
-          return `<ul class="skills-list">${items}</ul>`;
+          if (!Array.isArray(arr) || !arr.length) return "";
+          return (
+            `<ul class="skills-list">` +
+            arr
+              .map((a) => {
+                if (!a) return "";
+                if (typeof a === "string") return `<li>${safe(a)}</li>`;
+                if (a.achievement) return `<li>${safe(a.achievement)}</li>`;
+                if (a.text) return `<li>${safe(a.text)}</li>`;
+                return `<li>${safe(a.title || a.name || "")}</li>`;
+              })
+              .join("") +
+            `</ul>`
+          );
         }
 
-        // Compose final HTML (left + right)
+        // Compose final HTML: include a section only when it has content
         const root = document.getElementById("resumeRoot");
+        const contactHtml = buildContact(pi, pl);
+        const skillsHtml = listify(data.skills, {
+          type: "skills",
+          cls: "skills-list",
+        });
+        const languagesHtml = listify(data.languages, {
+          type: "languages",
+          cls: "skills-list",
+        });
+        const hobbiesHtml = listify(data.hobbies, { cls: "skills-list" });
+        const nameHtml =
+          pi.fullName || pi.name
+            ? `
+      <div class="block" style="margin-bottom:16px">
+        <h1 style="
+          margin:0;
+          font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          font-size:30px;
+          font-weight:700;
+          letter-spacing:0.4px;
+          color:#2b3344;
+        ">
+          ${safe(pi.fullName || pi.name)}
+        </h1>
+      </div>
+    `
+            : "";
+
+        const profileHtml = pi.summary
+          ? `<div class="block"><h2>PROFILE</h2><div class="profile-text">${safe(
+              pi.summary
+            ).replace(/\n/g, "<br>")}</div></div>`
+          : "";
+
+        const experienceHtml = buildExperience(data.experience);
+        const experienceBlock = experienceHtml
+          ? `<div class="block"><h2>WORK EXPERIENCE</h2><div class="timeline">${experienceHtml}</div></div>`
+          : "";
+
+        const educationHtml = buildEducation(data.education);
+        const educationBlock = educationHtml
+          ? `<div class="block"><h2>EDUCATION</h2>${educationHtml}</div>`
+          : "";
+
+        const internshipsHtml = buildInternships(data.internships);
+        const internshipsBlock = internshipsHtml
+          ? `<div class="block"><h2>INTERNSHIPS</h2>${internshipsHtml}</div>`
+          : "";
+
+        const projectsHtml = buildProjects(data.projects);
+        const projectsBlock = projectsHtml
+          ? `<div class="block"><h2>PROJECTS</h2>${projectsHtml}</div>`
+          : "";
+
+        const certsHtml = buildCertifications(data.certifications);
+        const certsBlock = certsHtml
+          ? `<div class="block"><h2>CERTIFICATIONS</h2>${certsHtml}</div>`
+          : "";
+
+        const achievementsHtml = buildAchievements(data.achievements);
+        const achievementsBlock = achievementsHtml
+          ? `<div class="block"><h2>ACHIEVEMENTS</h2>${achievementsHtml}</div>`
+          : "";
+
+        const additionalHtml = data.additionalInfo
+          ? `<div class="block"><h2>ADDITIONAL INFORMATION</h2><div>${safe(
+              data.additionalInfo
+            ).replace(/\n/g, "<br>")}</div></div>`
+          : "";
+
+        const declarationHtml = data.declaration
+          ? `<div class="block"><h2>DECLARATION</h2><div id="preview-declaration">${safe(
+              data.declaration
+            ).replace(/\n/g, "<br>")}</div></div>`
+          : "";
+
+        // Left column: only render section headers when their content exists
+        const leftSections = [];
+        if (contactHtml)
+          leftSections.push(
+            `<div class="section-title">CONTACT</div>${contactHtml}`
+          );
+        if (skillsHtml)
+          leftSections.push(
+            `<div class="section-title">SKILLS</div>${skillsHtml}`
+          );
+        if (languagesHtml)
+          leftSections.push(
+            `<div class="section-title">LANGUAGES</div>${languagesHtml}`
+          );
+        if (hobbiesHtml)
+          leftSections.push(
+            `<div class="section-title">HOBBIES</div>${hobbiesHtml}`
+          );
+
         root.innerHTML = `
+    
 
     <div class="resume-body">
-      <div class="left-col">
-        <div class="avatar" aria-hidden="true"><img id="avatarImg" src="${safe(
-          photo
-        )}" alt="Photo"></div>
+     <!-- left column: avatar only if photo exists -->
+  <div class="left-col">
 
-        <div class="section-title">CONTACT</div>
-        ${buildContact(pi, pl)}
+ <div class="avatar" aria-hidden="true">
+  ${
+    photo
+      ? `<img
+           id="avatarImg"
+           src="${safe(photo)}"
+           alt="Photo"
+           onerror="this.remove()"
+         >`
+      : ""
+  }
+</div>
 
-        <div class="section-title">SKILLS</div>
-        ${listify(data.skills, { type: "skills", cls: "skills-list" })}
 
-        <div class="section-title">LANGUAGES</div>
-        ${listify(data.languages, { type: "languages", cls: "skills-list" })}
+  ${leftSections.join("")}
+</div>
 
-        <div class="section-title">HOBBIES</div>
-        ${listify(data.hobbies, { cls: "skills-list" })}
-      </div>
 
       <div class="right-col">
-        <div class="resume-header">
-      <div class="name">${safe(pi.fullName || "RICHARD SANCHEZ")}</div>
-      <div class="subtitle">${safe(pi.jobTitle || pi.title || "")}</div>
-    </div>
-        <div class="block"><h2>PROFESSIONAL SUMMARY</h2>
-          ${
-            pi.summary
-              ? `<div class="profile-text">${safe(pi.summary).replace(
-                  /\n/g,
-                  "<br>"
-                )}</div>`
-              : '<div style="color:var(--muted)">No profile summary provided</div>'
-          }
-        </div>
-
-        <div class="block"><h2>EDUCATION</h2>${buildEducation(
-          data.education
-        )}</div>
-        
-        <div class="block"><h2>WORK EXPERIENCE</h2><div class="timeline">${buildExperience(
-          data.experience
-        )}</div></div>
-
-        
-
-        <div class="block"><h2>INTERNSHIPS</h2>${buildInternships(
-          data.internships
-        )}</div>
-
-        <div class="block"><h2>PROJECTS</h2>${buildProjects(
-          data.projects
-        )}</div>
-
-        <div class="block"><h2>CERTIFICATIONS</h2>${buildCertifications(
-          data.certifications
-        )}</div>
-
-        
-
-        <div class="block"><h2>ACHIEVEMENTS</h2>${buildAchievements(
-          data.achievements
-        )}</div>
-
-        <div class="block"><h2>ADDITIONAL INFORMATION</h2>${
-          data.additionalInfo
-            ? `<div>${safe(data.additionalInfo).replace(/\n/g, "<br>")}</div>`
-            : '<div style="color:var(--muted)">No additional information</div>'
-        }</div>
-
-        <div class="block"><h2>DECLARATION</h2>${
-          data.declaration
-            ? `<div id="preview-declaration">${safe(data.declaration).replace(
-                /\n/g,
-                "<br>"
-              )}</div>`
-            : '<div style="color:var(--muted)">No declaration provided</div>'
-        }</div>
+        ${nameHtml}
+        ${profileHtml}
+        ${experienceBlock}
+        ${educationBlock}
+        ${internshipsBlock}
+        ${projectsBlock}
+        ${certsBlock}
+        ${achievementsBlock}
+        ${additionalHtml}
+        ${declarationHtml}
       </div>
     </div>
   `;
-
-        // Final: hide left or right sections if they contain only placeholders (no real data)
-        // Hide left column lists if they only contain the placeholder entry
-        const leftChecks = [
-          {
-            sel: '.left-col .section-title:contains("SKILLS")',
-            listSel: ".left-col .skills-list",
-          },
-        ];
-        // (Browser querySelector doesn't support :contains — skipping aggressive auto-hide here;
-        //  we rely on the earlier rendering to show placeholders. If you want to completely hide empty sections,
-        //  we can add checks below based on array lengths.)
-        if (!Array.isArray(data.skills) || data.skills.length === 0) {
-          const el = root.querySelector(
-            ".left-col .section-title:nth-of-type(2)"
-          );
-          const list = root.querySelector(".left-col .skills-list");
-          if (list) list.style.display = "none";
-          if (el) el.style.display = "none";
-        }
-        if (!Array.isArray(data.languages) || data.languages.length === 0) {
-          const el = root.querySelector(
-            ".left-col .section-title:nth-of-type(3)"
-          );
-          const list = root.querySelector(
-            ".left-col .skills-list:nth-of-type(2)"
-          );
-          if (list) list.style.display = "none";
-          if (el) el.style.display = "none";
-        }
-        if (!Array.isArray(data.hobbies) || data.hobbies.length === 0) {
-          const el = root.querySelector(
-            ".left-col .section-title:nth-of-type(4)"
-          );
-          const list = root.querySelector(
-            ".left-col .skills-list:nth-of-type(3)"
-          );
-          if (list) list.style.display = "none";
-          if (el) el.style.display = "none";
-        }
-
-        // Hide right-column blocks that are empty (experience, projects, certifications...)
-        function hideIfEmpty(selector, arr) {
-          if (!Array.isArray(arr) || arr.length === 0) {
-            const node = root.querySelector(selector);
-            if (node) node.style.display = "none";
-          }
-        }
-        hideIfEmpty('.block h2:contains("WORK EXPERIENCE")', data.experience); // no native :contains — skip, rely on earlier placeholders
-        // Instead, hide blocks by checking arrays and selecting from the DOM by order:
-        // order in right-col: PROFILE (0), WORK EXPERIENCE (1), INTERNSHIPS (2), PROJECTS (3), CERTIFICATIONS (4), EDUCATION (5), ACHIEVEMENTS (6), ADDITIONAL (7), DECLARATION (8)
-        const rightBlocks = root.querySelectorAll(".right-col .block");
-        if (rightBlocks && rightBlocks.length) {
-          if (!Array.isArray(data.experience) || data.experience.length === 0)
-            rightBlocks[1] && (rightBlocks[1].style.display = "none");
-          if (!Array.isArray(data.internships) || data.internships.length === 0)
-            rightBlocks[2] && (rightBlocks[2].style.display = "none");
-          if (!Array.isArray(data.projects) || data.projects.length === 0)
-            rightBlocks[3] && (rightBlocks[3].style.display = "none");
-          if (
-            !Array.isArray(data.certifications) ||
-            data.certifications.length === 0
-          )
-            rightBlocks[4] && (rightBlocks[4].style.display = "none");
-          if (!Array.isArray(data.education) || data.education.length === 0)
-            rightBlocks[5] && (rightBlocks[5].style.display = "none");
-          if (
-            !Array.isArray(data.achievements) ||
-            data.achievements.length === 0
-          )
-            rightBlocks[6] && (rightBlocks[6].style.display = "none");
-          if (!data.additionalInfo)
-            rightBlocks[7] && (rightBlocks[7].style.display = "none");
-          if (!data.declaration)
-            rightBlocks[8] && (rightBlocks[8].style.display = "none");
-        }
-
-        // no return — IIFE ends
       })();
+
+      // ---------------- PDF creation (unchanged logic) ----------------
       document.getElementById("pdfBtn").addEventListener("click", async () => {
         try {
           log("PDF (screen-capture) start...");
-
-          // ensure required libs are loaded
           await ensureHtml2Pdf();
 
           const html2canvasFn =
@@ -1196,28 +1089,24 @@
             window.jsPDF ||
             (window.jspdf && window.jspdf.jsPDF) ||
             (window.html2pdf && window.html2pdf.jsPDF);
-
           if (!html2canvasFn) throw new Error("html2canvas not available.");
           if (!jsPDFClass) throw new Error("jsPDF not available.");
 
-          // force avatar to data URL (avoid tainted canvas)
           const avatarImg = document.getElementById("avatarImg");
           if (avatarImg && avatarImg.src) {
             try {
               const dataUrl = await imageUrlToDataUrl(avatarImg.src);
               avatarImg.src = dataUrl;
             } catch (e) {
-              log("avatar -> dataUrl conversion failed (continuing):", e);
+              log("avatar -> dataUrl conversion failed:", e);
             }
           }
 
           const rootEl = document.getElementById("resumeRoot");
           if (!rootEl) throw new Error("resumeRoot element not found.");
-
           window.scrollTo(0, 0);
 
-          // capture
-          const DPR = 3; // high clarity. kept constant to match other math.
+          const DPR = Math.min(window.devicePixelRatio || 1, 3);
           const canvas = await html2canvasFn(rootEl, {
             scale: DPR,
             useCORS: true,
@@ -1227,16 +1116,14 @@
               window.getComputedStyle(rootEl).backgroundColor || "#ffffff",
           });
 
-          // A4 sizes in mm and px math
-          const A4_WIDTH_MM = 210;
-          const A4_HEIGHT_MM = 297;
-          const pxPerMm = (96 * DPR) / 25.4; // matches earlier logic
+          const A4_WIDTH_MM = 210,
+            A4_HEIGHT_MM = 297;
+          const pxPerMm = (96 * DPR) / 25.4;
           const a4Wpx = Math.round(A4_WIDTH_MM * pxPerMm);
           const a4Hpx = Math.round(A4_HEIGHT_MM * pxPerMm);
 
-          // scale canvas to fit A4 width if needed
-          const capturedW = canvas.width;
-          const capturedH = canvas.height;
+          const capturedW = canvas.width,
+            capturedH = canvas.height;
           const widthScale = Math.min(1, a4Wpx / capturedW);
           const targetWpx = Math.round(capturedW * widthScale);
           const targetHpx = Math.round(capturedH * widthScale);
@@ -1262,9 +1149,8 @@
             finalCanvas = tmp;
           }
 
-          // page slicing geometry (first page different because of bottom margin)
-          const TOP_MARGIN_MM = 12;
-          const BOTTOM_MARGIN_MM = 12;
+          const TOP_MARGIN_MM = 12,
+            BOTTOM_MARGIN_MM = 12;
           const topMarginPx = Math.round(TOP_MARGIN_MM * pxPerMm);
           const bottomMarginPx = Math.round(BOTTOM_MARGIN_MM * pxPerMm);
           const availableHeightPx = a4Hpx - topMarginPx - bottomMarginPx;
@@ -1282,18 +1168,8 @@
             ) + (finalCanvas.height > 0 ? 1 : 0)
           );
 
-          log("capture:", {
-            canvasW: finalCanvas.width,
-            canvasH: finalCanvas.height,
-            a4Wpx,
-            a4Hpx,
-            DPR,
-            widthScale,
-            pages: actualPages,
-          });
-
           const pageImages = [];
-          const sidebarCssPx = 230; // must match your CSS left column width
+          const sidebarCssPx = 230;
           const sidebarPx = Math.round(sidebarCssPx * DPR * widthScale);
 
           for (let p = 0; p < actualPages; p++) {
@@ -1301,40 +1177,29 @@
               p === 0
                 ? 0
                 : firstPageHeightPx + (p - 1) * subsequentPageHeightPx;
-
             const srcH = Math.min(
               p === 0 ? firstPageHeightPx : subsequentPageHeightPx,
               Math.max(0, finalCanvas.height - sliceStartY)
             );
-
             const pageCanvas = document.createElement("canvas");
             pageCanvas.width = a4Wpx;
             pageCanvas.height = a4Hpx;
             const ctx = pageCanvas.getContext("2d");
-
-            // paint sidebar + white content area so sidebar color fills entire page
-            // Replace the entire sidebarColor block with this:
-            const sidebarGradient =
-              getComputedStyle(document.documentElement)
-                .getPropertyValue("--sidebar-bg")
-                .trim() || "linear-gradient(135deg,#9bee8e)";
-            const gradient = ctx.createLinearGradient(0, 0, sidebarPx, 0);
-            gradient.addColorStop(0, "#9bee8e");
-            gradient.addColorStop(1, "#9bee8e");
-            ctx.fillStyle = gradient;
+            const sidebarColor = (
+              getComputedStyle(document.documentElement).getPropertyValue(
+                "--sidebar-bg"
+              ) || "#e9e9eb"
+            ).trim();
+            ctx.fillStyle = sidebarColor;
             ctx.fillRect(0, 0, sidebarPx, a4Hpx);
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(sidebarPx, 0, a4Wpx - sidebarPx, a4Hpx);
-
             const drawOffsetY = p === 0 ? 0 : topMarginPx;
-
-            // compute destination size so the slice fits the page width (preserve aspect)
             const destW = a4Wpx;
             const destH = Math.round(srcH * (destW / finalCanvas.width));
             const destX = 0;
             const destY = drawOffsetY;
-
-            if (srcH > 0 && destH > 0) {
+            if (srcH > 0 && destH > 0)
               ctx.drawImage(
                 finalCanvas,
                 0,
@@ -1346,8 +1211,6 @@
                 destW,
                 destH
               );
-            }
-
             pageImages.push(pageCanvas.toDataURL("image/jpeg", 1.0));
           }
 
@@ -1356,9 +1219,21 @@
             format: "a4",
             orientation: "portrait",
           });
+          for (let p = 0; p < pageImages.length; p++) {
+            if (p > 0) doc.addPage();
+            doc.addImage(
+              pageImages[p],
+              "JPEG",
+              0,
+              0,
+              A4_WIDTH_MM,
+              A4_HEIGHT_MM,
+              undefined,
+              "NONE"
+            );
+          }
 
-          // ---------- Anchors -> PDF links (robust mapping) ----------
-          // compute anchor rects relative to resumeRoot in CSS px (document coordinates)
+          // add links mapping
           const anchors = Array.from(rootEl.querySelectorAll("a[href]")).map(
             (a) => {
               const href = a.href;
@@ -1373,24 +1248,19 @@
               };
             }
           );
-
-          // converter: CSS px -> finalCanvas px -> mm
           function cssPxToMm(cssPx) {
-            const canvasPx = cssPx * DPR * widthScale; // px in finalCanvas coordinates
-            return canvasPx / pxPerMm; // mm
+            const canvasPx = cssPx * DPR * widthScale;
+            return canvasPx / pxPerMm;
           }
-
           const FIRST_PAGE_HEIGHT_MM = firstPageHeightPx / pxPerMm;
           const SUBSEQ_PAGE_HEIGHT_MM = subsequentPageHeightPx / pxPerMm;
 
           anchors.forEach((a) => {
             if (!a.href) return;
-
             const leftMm = cssPxToMm(a.leftCss);
             const topMm = cssPxToMm(a.topCss);
             const wMm = cssPxToMm(a.widthCss);
             const hMm = cssPxToMm(a.heightCss);
-
             function mmToPage(mmY) {
               if (mmY < FIRST_PAGE_HEIGHT_MM) return 0;
               return (
@@ -1398,125 +1268,37 @@
                 Math.floor((mmY - FIRST_PAGE_HEIGHT_MM) / SUBSEQ_PAGE_HEIGHT_MM)
               );
             }
-
             const startPage = mmToPage(topMm);
             const endPage = mmToPage(topMm + hMm - 1e-6);
-
             for (let page = startPage; page <= endPage; page++) {
               if (page < 0 || page >= pageImages.length) continue;
-
               const pageGlobalTopMm =
                 page === 0
                   ? 0
                   : FIRST_PAGE_HEIGHT_MM + (page - 1) * SUBSEQ_PAGE_HEIGHT_MM;
-              const pageGlobalBottomMm =
-                page === 0
-                  ? FIRST_PAGE_HEIGHT_MM
-                  : pageGlobalTopMm + SUBSEQ_PAGE_HEIGHT_MM;
-
               const segTopGlobal = Math.max(topMm, pageGlobalTopMm);
-              const segBottomGlobal = Math.min(topMm + hMm, pageGlobalBottomMm);
-              const segHeightMm = segBottomGlobal - segTopGlobal;
-              if (segHeightMm <= 0) continue;
-
-              let localTopMm;
-              if (page === 0) {
-                localTopMm = segTopGlobal;
-              } else {
-                localTopMm = segTopGlobal - pageGlobalTopMm + TOP_MARGIN_MM;
-              }
-
-              const safeLeft = Math.max(0, leftMm);
-              const safeTop = Math.max(0, localTopMm);
-              const safeWidth = Math.max(0.1, wMm);
-              const safeHeight = Math.max(0.1, segHeightMm);
-
-              doc.addPage(); // We'll add image pages below properly; but jsPDF.link expects the page to exist.
-              // (We won't keep these extra pages — we'll add images next in order properly.)
-              // So instead of doc.addPage here (which creates mis-ordered pages), we'll postpone link adding
-              // and collect link rectangles per page in a map. (Simpler approach below.)
-            }
-          });
-
-          // --- simpler reliable approach: add images to doc first, then create links using same math ---
-          // clear doc pages created by any accidental addPage above (recreate doc clean)
-          const doc2 = new jsPDFClass({
-            unit: "mm",
-            format: "a4",
-            orientation: "portrait",
-          });
-
-          // add all page images
-          for (let p = 0; p < pageImages.length; p++) {
-            if (p > 0) doc2.addPage();
-            doc2.addImage(
-              pageImages[p],
-              "JPEG",
-              0,
-              0,
-              A4_WIDTH_MM,
-              A4_HEIGHT_MM,
-              undefined,
-              "NONE"
-            );
-          }
-
-          // now create links using same mapping but add them to doc2
-          anchors.forEach((a) => {
-            if (!a.href) return;
-
-            const leftMm = cssPxToMm(a.leftCss);
-            const topMm = cssPxToMm(a.topCss);
-            const wMm = cssPxToMm(a.widthCss);
-            const hMm = cssPxToMm(a.heightCss);
-
-            function mmToPage(mmY) {
-              if (mmY < FIRST_PAGE_HEIGHT_MM) return 0;
-              return (
-                1 +
-                Math.floor((mmY - FIRST_PAGE_HEIGHT_MM) / SUBSEQ_PAGE_HEIGHT_MM)
+              const segBottomGlobal = Math.min(
+                topMm + hMm,
+                pageGlobalTopMm + SUBSEQ_PAGE_HEIGHT_MM
               );
-            }
-
-            const startPage = mmToPage(topMm);
-            const endPage = mmToPage(topMm + hMm - 1e-6);
-
-            for (let page = startPage; page <= endPage; page++) {
-              if (page < 0 || page >= pageImages.length) continue;
-
-              const pageGlobalTopMm =
-                page === 0
-                  ? 0
-                  : FIRST_PAGE_HEIGHT_MM + (page - 1) * SUBSEQ_PAGE_HEIGHT_MM;
-              const pageGlobalBottomMm =
-                page === 0
-                  ? FIRST_PAGE_HEIGHT_MM
-                  : pageGlobalTopMm + SUBSEQ_PAGE_HEIGHT_MM;
-
-              const segTopGlobal = Math.max(topMm, pageGlobalTopMm);
-              const segBottomGlobal = Math.min(topMm + hMm, pageGlobalBottomMm);
               const segHeightMm = segBottomGlobal - segTopGlobal;
               if (segHeightMm <= 0) continue;
-
-              let localTopMm;
-              if (page === 0) localTopMm = segTopGlobal;
-              else localTopMm = segTopGlobal - pageGlobalTopMm + TOP_MARGIN_MM;
-
+              let localTopMm =
+                page === 0
+                  ? segTopGlobal
+                  : segTopGlobal - pageGlobalTopMm + TOP_MARGIN_MM;
               const safeLeft = Math.max(0, leftMm);
               const safeTop = Math.max(0, localTopMm);
               const safeWidth = Math.max(0.1, wMm);
               const safeHeight = Math.max(0.1, segHeightMm);
-
-              // ensure we target the correct page
-              doc2.setPage(page + 1); // jsPDF pages are 1-indexed
-              doc2.link(safeLeft, safeTop, safeWidth, safeHeight, {
+              doc.setPage(page + 1);
+              doc.link(safeLeft, safeTop, safeWidth, safeHeight, {
                 url: a.href,
               });
             }
           });
 
-          // save using doc2
-          doc2.save("resume.pdf");
+          doc.save("resume.pdf");
           log("PDF saved.");
         } catch (err) {
           console.error("PDF error:", err);
