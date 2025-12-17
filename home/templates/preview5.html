@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Template 5 Resume</title>
+<style>
+    /* PDF second page and above → push content down */
+/* FORCE TOP MARGIN FOR ALL PDF PAGES EXCEPT FIRST */
+@media print {
+    .html2pdf__page-break + * {
+        margin-top: 70px !important;   /* top gap */
+        padding-top: 20px !important;  /* inside spacing */
+    }
+}
+
+.pdf-page + .pdf-page {
+    margin-top: 80px !important;
+    padding-top: 40px !important;
+}
+
+/* ===== GLOBAL STYLES ===== */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: "Poppins", Arial, sans-serif;
+   background: #fdeeee !important; /* FULL PAGE BACKGROUND */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* ===== PAGE WRAPPER (A4 PRECISE) ===== */
+.page-wrapper {
+    background: #ffffff !important;
+    width: 794px;
+    min-height: 1123px;
+    margin: 40px auto;       /* nice gap top & bottom */
+    padding: 0;
+    box-shadow: 0 0 20px rgba(0,0,0,0.10); /* soft shadow like screenshot */
+    border-radius: 6px;
+}
+
+/* ===== INNER CONTENT (PDF PAGE) ===== */
+.resume-container {
+    display: flex;
+    width: 100%;
+    justify-content: center; /* Center the left + right panels */
+    gap: 20px;               /* space between left & right panel */
+}
+
+.left {
+    width: 32%;
+    background: #f8c6cc !important;
+    padding: 25px 10px 40px;
+}
+
+.left ul {
+    list-style: none;
+    padding-left: 20px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.left ul li {
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 6px;
+}
+
+.left ul li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Profile Pic and Name */
+.profile-pic {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 6px solid #fff;
+    margin-top: 15px;
+}
+
+.name {
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 20px;
+}
+
+.role {
+    color: #444;
+    font-size: 14px;
+}
+
+/* Section Titles */
+.section-title,
+.block-title {
+    background: #f4a8b3;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    width: fit-content;
+    margin: 25px auto 10px;
+    border-radius: 20px;
+}
+
+/* Skill Items */
+.skill-item {
+    margin: 8px 0;
+    font-weight: 600;
+}
+
+.skill-cat {
+    font-size: 12px;
+    color: #333;
+}
+
+.skill-level {
+    display: block;
+    font-size: 12px;
+    color: #666;
+}
+
+/* ===== RIGHT PANEL ===== */
+/* RIGHT PANEL */
+.right {
+    width: 80%;
+    padding: 25px 40px;        /* ⭐ Equal left & right padding */
+    box-sizing: border-box;
+padding-left: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;   /* ⭐ Keeps content aligned like left side */
+} 
+.right .block {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.right a, .left a {
+    word-break: break-all;
+}
+
+/* Ensure equal left & right margins inside right panel */
+.right .block > div {
+    text-align: justify;
+    text-justify: inter-word;
+    line-height: 1.5;
+}
+
+/* Force spacing below block titles */
+.block {
+    margin-bottom: 25px;
+}
+
+/* Right side description text justification */
+#summary,
+#education div,
+#experience div,
+#projects div,
+#certifications div,
+#internships div,
+#additionalInfo,
+#declaration {
+    text-align: justify;
+    text-justify: inter-word;
+    line-height: 1.6;
+    margin-bottom: 6px;
+}
+
+/* PDF page spacing for additional pages */
+.pdf-page:not(:first-of-type) {
+    margin-top: 60px !important;
+    padding-top: 40px !important;
+}
+
+/* ===== PDF PRINT RULES ===== */
+@media print {
+    body, html {
+        background: #fdeeee !important;
+    }
+    .page-wrapper {
+        background: #fdeeee !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .pdf-page {
+    background: #ffffff !important;
+    width: 794px;       /* full A4 width for PDF */
+    padding: 30px;      /* internal padding for top/bottom spacing */
+    box-sizing: border-box;
+    display: block;
+}
+}
+</style>
+
+</head>
+<body style="background:#fdeeee !important;">
+
+
+<!-- ⭐ MODEL STYLE DOWNLOAD BUTTONS -->
+<div style="
+    width: 900px; 
+    margin: 20px auto 10px auto; 
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 12px;
+">
+    <button onclick="downloadPDF()" 
+        style="padding:10px 18px;
+        background:#2b3444;
+        color:white;
+        border:2px solid #1a202c;
+        border-radius:8px;
+        font-size:14px;
+        font-weight:600;
+        cursor:pointer;">
+        Download PDF (exact)
+    </button>
+
+    <button onclick="downloadTXT()" 
+        style="padding:10px 18px;
+        background:#2b3444;
+        color:white;
+        border:2px solid #1a202c;
+        border-radius:8px;
+        font-size:14px;
+        font-weight:600;
+        cursor:pointer;">
+        Download TXT
+    </button>
+</div>
+
+<div class="page-wrapper">
+    <div class="pdf-page">
+        <div class="resume-container">
+            <!-- your LEFT + RIGHT content AS IS -->
+
+
+
+    <!-- LEFT -->
+    <div class="left">
+        <img id="photo" class="profile-pic">
+
+        <div class="name" id="fullName"></div>
+        <div class="role" id="jobTitle"></div>
+
+        <div class="section-title">CONTACT</div>
+        <ul id="contactList"></ul>
+
+        <div class="section-title" id="skillsTitle">SKILLS</div>
+        <ul id="skillsList"></ul>
+
+        <div class="section-title" id="languagesTitle">LANGUAGES</div>
+        <ul id="langList"></ul>
+
+        <div class="section-title" id="hobbyTitle">HOBBIES</div>
+        <ul id="hobbyList"></ul>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+
+        <div class="block">
+            <div class="block-title">SUMMARY</div>
+            <div id="summary"></div>
+        </div>
+
+        <div class="block">
+            <div class="block-title">EDUCATION</div>
+            <div id="education"></div>
+        </div>
+
+        <div class="block">
+            <div class="block-title">EXPERIENCE</div>
+            <div id="experience"></div>
+        </div>
+
+        <div class="block">
+            <div class="block-title">PROJECTS</div>
+            <div id="projects"></div>
+        </div>
+
+        <div class="block">
+            <div class="block-title">CERTIFICATIONS</div>
+            <div id="certifications"></div>
+        </div>
+
+        <div class="block">
+            <div class="block-title">INTERNSHIPS</div>
+            <div id="internships"></div>
+        </div>
+
+        <div class="block" id="achievementsBlock" style="display:none;">
+            <div class="block-title">ACHIEVEMENTS</div>
+            <div id="achievements"></div>
+        </div>
+
+        <div class="block" id="additionalInfoBlock" style="display:none;">
+            <div class="block-title">ADDITIONAL INFORMATION</div>
+            <div id="additionalInfo"></div>
+        </div>
+
+        <div class="block" id="declarationBlock">
+            <div class="block-title">DECLARATION</div>
+            <div id="declaration"></div>
+        </div>
+
+    </div>
+</div>
+
+<!-- PDF LIBRARY -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+    // ---------- URL helpers ----------
+function normalizeUrl(u) {
+  if (!u) return "";
+  try {
+    u = String(u).trim();
+    // allow data:, blob:, / relative paths, http(s)
+    if (/^(data:|blob:|\/|http:\/\/|https:\/\/)/i.test(u)) return u;
+    return "https://" + u;
+  } catch {
+    return "";
+  }
+}
+// ---------- DATE HELPERS ----------
+function formatMonthYear(val) {
+  if (!val) return "";
+  val = String(val).trim();
+  // year-only
+  if (/^\d{4}$/.test(val)) {
+    const y = parseInt(val, 10);
+    return new Date(y, 0, 1).toLocaleString("default", { month: "short", year: "numeric" });
+  }
+  // accept YYYY-MM or YYYY-M
+  const parts = val.split("-");
+  if (parts.length < 2) return val;
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  if (isNaN(year) || isNaN(month)) return val;
+  return new Date(year, month - 1, 1).toLocaleString("default", { month: "short", year: "numeric" });
+}
+
+function formatRange(item) {
+  if (!item) return "";
+  const startRaw = item.startDate || item.from || "";
+  const endRaw = item.endDate || item.to || "";
+  const current = !!item.current || /present|now/i.test(String(endRaw));
+  const start = startRaw ? formatMonthYear(startRaw) : "";
+  const end = current ? "Present" : (endRaw ? formatMonthYear(endRaw) : "");
+  if (start && end) return `${start} – ${end}`;
+  return start || end || "";
+}
+// ---------- end date helpers ----------
+
+
+function renderTemplate5() {
+
+    const data = JSON.parse(localStorage.getItem("resumeData") || "{}");
+
+    document.getElementById("photo").src = data.personalInfo?.profilePhoto || "";
+    document.getElementById("fullName").textContent = data.personalInfo?.fullName || "";
+    document.getElementById("jobTitle").textContent = data.personalInfo?.jobTitle || "";
+    document.getElementById("summary").textContent = data.personalInfo?.summary || "";
+
+    let c = "";
+    if (data.personalInfo?.phone) c += `<li><a href="tel:${data.personalInfo.phone}">${data.personalInfo.phone}</a></li>`;
+    if (data.personalInfo?.email) c += `<li><a href="mailto:${data.personalInfo.email}">${data.personalInfo.email}</a></li>`;
+    if (data.personalInfo?.location) c += `<li>${data.personalInfo.location}</li>`;
+
+   // ⭐ PUBLIC LINKS (dynamic & unlimited)
+if (data.publicLinks && Array.isArray(data.publicLinks)) {
+    data.publicLinks.forEach(link => {
+        if (link.url && link.label) {
+            c += `<li>
+                    <a href="${link.url}" target="_blank">
+                        ${link.label} - ${link.url}
+                    </a>
+                  </li>`;
+        }
+    });
+} 
+// ⭐ If older object format exists (backward compatibility)
+else if (data.publicLinks) {
+    Object.entries(data.publicLinks).forEach(([key, val]) => {
+        if (val && typeof val === "string") {
+            c += `<li>
+                    <a href="${val}" target="_blank">${val}</a>
+                  </li>`;
+        }
+    });
+}
+
+    document.getElementById("contactList").innerHTML = c;
+
+  let sk = "";
+(data.skills || []).forEach(s => {
+    if (s.name && s.name.trim() !== "") {
+        sk += `<li>
+                <div class="skill-item">${s.name}</div>
+                <div class="skill-cat">${s.category}</div>
+                <div class="skill-level">${s.level}</div>
+               </li>`;
+    }
+});
+
+document.getElementById("skillsList").innerHTML = sk;
+
+if (!sk.trim()) {
+    document.getElementById("skillsTitle").style.display = "none";
+    document.getElementById("skillsList").style.display = "none";
+}
+
+   let lg = "";
+(data.languages || []).forEach(l => {
+    if (l.name && l.name.trim() !== "") {
+        lg += `<li><span class="bold">${l.name}</span> - ${l.level}</li>`;
+    }
+});
+
+document.getElementById("langList").innerHTML = lg;
+
+if (!lg.trim()) {
+    document.getElementById("languagesTitle").style.display = "none";
+    document.getElementById("langList").style.display = "none";
+}
+
+
+    let hb = "";
+    (data.hobbies || []).forEach(h => {
+        hb += `<li>${typeof h === "string" ? h : Object.values(h)[0]}</li>`;
+    });
+    document.getElementById("hobbyList").innerHTML = hb;
+
+    if (!hb.trim()) {
+        document.getElementById("hobbyTitle").style.display = "none";
+        document.getElementById("hobbyList").style.display = "none";
+    }
+
+   let ed = "";
+(data.education || []).forEach(e => {
+    if ((e.degree && e.degree.trim() !== "") ||
+        (e.institution && e.institution.trim() !== "") ||
+        (e.score && e.score.trim() !== "") ||
+        (e.description && e.description.trim() !== "")) {
+        ed += `
+        <div class="edu-item">
+            <div class="bold">${e.degree}</div>
+            <div>${e.institution}</div>
+           <div>${formatRange(e)}</div>
+
+            <div class="bold">${e.scoreType || "Score"}: ${e.score || ""}</div>
+            <div>${e.description || ""}</div>
+        </div>`;
+    }
+});
+document.getElementById("education").innerHTML = ed;
+document.getElementById("education").parentNode.style.display = ed.trim() ? "block" : "none";
+
+
+  let ex = "";
+(data.experience || []).forEach(x => {
+    if ((x.jobTitle && x.jobTitle.trim() !== "") ||
+        (x.company && x.company.trim() !== "") ||
+        (x.description && x.description.trim() !== "")) {
+        ex += `
+        <div class="exp-item">
+            <div class="bold">${x.jobTitle}</div>
+            <div>${x.company}</div>
+           <div>${formatRange(x)}</div>
+
+            <div>${x.description}</div>
+        </div>`;
+    }
+});
+document.getElementById("experience").innerHTML = ex;
+document.getElementById("experience").parentNode.style.display = ex.trim() ? "block" : "none";
+
+
+  let pr = "";
+(data.projects || []).forEach(p => {
+    if ((p.name && p.name.trim() !== "") ||
+        (p.projectUrl && p.projectUrl.trim() !== "") ||
+        (p.description && p.description.trim() !== "")) {
+        pr += `
+        <div class="project-item">
+            <div class="bold">${p.name}</div>
+            ${p.projectUrl ? `<div><a href="${p.projectUrl}" target="_blank">${p.projectUrl}</a></div>` : ""}
+           <div>${formatRange(p)}</div>
+
+            <div>${p.description}</div>
+        </div>`;
+    }
+});
+document.getElementById("projects").innerHTML = pr;
+document.getElementById("projects").parentNode.style.display = pr.trim() ? "block" : "none";
+
+   let ct = "";
+(data.certifications || []).forEach(c => {
+    if ((c.name && c.name.trim() !== "") ||
+        (c.issuer && c.issuer.trim() !== "") ||
+        (c.url && c.url.trim() !== "") ||
+        (c.date && c.date.trim() !== "")) {
+        ct += `
+        <div class="cert-item">
+            <div class="bold">${c.name}</div>
+            <div>${c.issuer}</div>
+            ${c.url ? `<div><a href="${c.url}" target="_blank">${c.url}</a></div>` : ""}
+            <div>${c.date}</div>
+        </div>`;
+    }
+});
+document.getElementById("certifications").innerHTML = ct;
+document.getElementById("certifications").parentNode.style.display = ct.trim() ? "block" : "none";
+
+
+  let inn = "";
+(data.internships || []).forEach(i => {
+    if ((i.name && i.name.trim() !== "") ||
+        (i.organization && i.organization.trim() !== "") ||
+        (i.description && i.description.trim() !== "")) {
+        inn += `
+        <div class="intern-item">
+            <div class="bold">${i.name}</div>
+            <div>${i.organization}</div>
+           <div>${formatRange(i)}</div>
+
+            <div>${i.description}</div>
+        </div>`;
+    }
+});
+document.getElementById("internships").innerHTML = inn;
+document.getElementById("internships").parentNode.style.display = inn.trim() ? "block" : "none";
+
+
+  let ach = "";
+(data.achievements || []).forEach(a => {
+    let text = typeof a === "string" ? a : a.achievement || Object.values(a)[0] || "";
+    if (text.trim() !== "") {
+        ach += `<div class="ach-item"><div>${text}</div></div>`;
+    }
+});
+document.getElementById("achievements").innerHTML = ach;
+document.getElementById("achievementsBlock").style.display = ach.trim() ? "block" : "none";
+
+    document.getElementById("achievements").innerHTML = ach;
+    document.getElementById("achievementsBlock").style.display =
+        ach.trim() !== "" ? "block" : "none";
+if (data.additionalInfo?.trim()) {
+    document.getElementById("additionalInfo").innerText = data.additionalInfo;
+    document.getElementById("additionalInfoBlock").style.display = "block";
+} else {
+    document.getElementById("additionalInfoBlock").style.display = "none";
+}
+
+
+
+const declaration = (data.declaration || "").trim();
+if (declaration.length > 0) {
+    document.getElementById("declaration").textContent = declaration;
+    document.getElementById("declarationBlock").style.display = "block";
+} else {
+    document.getElementById("declarationBlock").style.display = "none";
+}
+
+
+}
+
+renderTemplate5();
+window.addEventListener("storage", renderTemplate5);
+
+/* ---------- ensureHtml2Pdf helper ----------
+   Loads html2canvas, jsPDF and html2pdf if missing.
+   Returns a Promise that resolves when libs are ready.
+   Paste this BEFORE function downloadPDF().
+*/
+function ensureHtml2Pdf(timeout = 12000) {
+  return new Promise((resolve, reject) => {
+    try {
+      // If already present, normalize globals and resolve.
+      if (
+        window.html2pdf &&
+        (window.html2canvas || (window.html2pdf && window.html2pdf.html2canvas)) &&
+        (window.jsPDF || (window.jspdf && window.jspdf.jsPDF) || (window.html2pdf && window.html2pdf.jsPDF))
+      ) {
+        if (!window.html2canvas && window.html2pdf && window.html2pdf.html2canvas) window.html2canvas = window.html2pdf.html2canvas;
+        if (!window.jsPDF) {
+          if (window.jspdf && window.jspdf.jsPDF) window.jsPDF = window.jspdf.jsPDF;
+          if (window.html2pdf && window.html2pdf.jsPDF) window.jsPDF = window.html2pdf.jsPDF;
+        }
+        return resolve();
+      }
+
+      const libs = [
+        { src: "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js", check: () => !!window.html2canvas || !!(window.html2pdf && window.html2pdf.html2canvas) },
+        { src: "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", check: () => !!(window.jspdf && window.jspdf.jsPDF) || !!window.jsPDF },
+        { src: "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js", check: () => !!window.html2pdf }
+      ];
+
+      let i = 0;
+      function loadNext() {
+        if (i >= libs.length) {
+          // final normalization
+          if (!window.html2canvas && window.html2pdf && window.html2pdf.html2canvas) window.html2canvas = window.html2pdf.html2canvas;
+          if (!window.jsPDF) {
+            if (window.jspdf && window.jspdf.jsPDF) window.jsPDF = window.jspdf.jsPDF;
+            if (window.html2pdf && window.html2pdf.jsPDF) window.jsPDF = window.html2pdf.jsPDF;
+          }
+          if ((window.html2canvas || window.html2pdf?.html2canvas) && (window.jsPDF || window.jspdf?.jsPDF || window.html2pdf?.jsPDF)) return resolve();
+          return reject(new Error("Libraries loaded but not attached to window."));
+        }
+
+        if (libs[i].check()) {
+          i++;
+          return loadNext();
+        }
+
+        const s = document.createElement("script");
+        s.src = libs[i].src;
+        s.async = true;
+        s.onload = () => {
+          // small delay to let the library attach
+          setTimeout(() => {
+            // normalize early
+            if (!window.html2canvas && window.html2pdf && window.html2pdf.html2canvas) window.html2canvas = window.html2pdf.html2canvas;
+            if (!window.jsPDF) {
+              if (window.jspdf && window.jspdf.jsPDF) window.jsPDF = window.jspdf.jsPDF;
+              if (window.html2pdf && window.html2pdf.jsPDF) window.jsPDF = window.html2pdf.jsPDF;
+            }
+            i++;
+            loadNext();
+          }, 40);
+        };
+        s.onerror = () => reject(new Error("Failed to load " + libs[i].src));
+        document.head.appendChild(s);
+      }
+
+      loadNext();
+
+      // timeout safety
+      setTimeout(() => {
+        if ((window.html2canvas || window.html2pdf?.html2canvas) && (window.jsPDF || window.jspdf?.jsPDF || window.html2pdf?.jsPDF)) {
+          return resolve();
+        }
+        reject(new Error("Timed out loading PDF libraries."));
+      }, timeout);
+
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+<!-- ⭐ PERFECT PDF ALIGNMENT -->
+function downloadPDF() {
+  (async () => {
+    try {
+      // 1) make sure html2pdf/html2canvas/jsPDF are available (loads CDN if needed)
+      await ensureHtml2Pdf();
+
+      // pick root to capture (page-wrapper preferred)
+      const rootEl = document.querySelector(".page-wrapper") || document.querySelector(".pdf-page") || document.getElementById("resumeRoot");
+      if (!rootEl) throw new Error("Capture root not found: .page-wrapper or .pdf-page or #resumeRoot");
+
+      // 2) try converting visible images (avatar / left images / #photo) to dataURLs to avoid CORS problems
+      const imageSelectors = ["#avatarImg", "#photo", ".left img", ".avatar img", "img"];
+      const images = [];
+      imageSelectors.forEach(sel => {
+        Array.from(rootEl.querySelectorAll(sel)).forEach(i => images.push(i));
+      });
+
+      // try convert each image to dataURL (best-effort)
+      for (const img of images) {
+        if (!img || !img.src) continue;
+        try {
+          // skip if already data URL
+          if (img.src.startsWith("data:")) continue;
+
+          // attempt fetch & blob -> dataURL (works when page is served over http(s))
+          const resp = await fetch(img.src, { mode: "cors" });
+          if (resp.ok) {
+            const blob = await resp.blob();
+            await new Promise((res, rej) => {
+              const reader = new FileReader();
+              reader.onload = () => {
+                img.src = reader.result; // replace src with data url
+                res();
+              };
+              reader.onerror = () => rej(new Error("FileReader failed"));
+              reader.readAsDataURL(blob);
+            });
+          } else {
+            // If fetch fails, set crossOrigin and try to reload image (may still fail)
+            img.crossOrigin = "anonymous";
+            try {
+              await new Promise((res, rej) => {
+                img.onload = () => res();
+                img.onerror = () => rej();
+                const src = img.src;
+                img.src = src + (src.includes("?") ? "&" : "?") + "cache-bust=" + Date.now();
+              });
+            } catch (e) {
+              console.warn("Image fetch/convert failed for", img.src, e);
+            }
+          }
+        } catch (e) {
+          console.warn("image conversion skipped for", img.src, e);
+        }
+      }
+
+      // 3) pick html2canvas + jsPDF implementations (they are ensured by ensureHtml2Pdf)
+      const html2canvasFn = window.html2canvas || (window.html2pdf && window.html2pdf.html2canvas);
+      const jsPDFClass = window.jsPDF || (window.jspdf && window.jspdf.jsPDF) || (window.html2pdf && window.html2pdf.jsPDF);
+      if (!html2canvasFn) throw new Error("html2canvas not available after loader.");
+      if (!jsPDFClass) throw new Error("jsPDF not available after loader.");
+
+      // 4) do screen capture into canvas
+      const DPR = Math.min(window.devicePixelRatio || 1, 3);
+      const canvas = await html2canvasFn(rootEl, {
+        scale: DPR,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: window.getComputedStyle(rootEl).backgroundColor || "#ffffff",
+        logging: false
+      });
+
+      // 5) calculate A4 sizes (mm -> px)
+      const A4_W_MM = 210, A4_H_MM = 297;
+      const pxPerMm = (96 * DPR) / 25.4;
+      const a4Wpx = Math.round(A4_W_MM * pxPerMm);
+      const a4Hpx = Math.round(A4_H_MM * pxPerMm);
+
+      // 6) scale horizontally if needed to fit A4 width
+      const capturedW = canvas.width, capturedH = canvas.height;
+      const widthScale = Math.min(1, a4Wpx / capturedW);
+      const targetWpx = Math.round(capturedW * widthScale);
+      const targetHpx = Math.round(capturedH * widthScale);
+      let finalCanvas = canvas;
+      if (widthScale !== 1) {
+        const tmp = document.createElement("canvas");
+        tmp.width = targetWpx;
+        tmp.height = targetHpx;
+        const ctx = tmp.getContext("2d");
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, tmp.width, tmp.height);
+        finalCanvas = tmp;
+      }
+
+      // 7) paging math (margins are small to match your layout)
+      const TOP_MARGIN_MM = 12, BOTTOM_MARGIN_MM = 12;
+      const topMarginPx = Math.round(TOP_MARGIN_MM * pxPerMm);
+      const bottomMarginPx = Math.round(BOTTOM_MARGIN_MM * pxPerMm);
+      const availableHeightPx = a4Hpx - topMarginPx - bottomMarginPx;
+      const firstPageHeightPx = a4Hpx - bottomMarginPx;
+      const subsequentPageHeightPx = availableHeightPx;
+
+      const actualPages = Math.max(
+        1,
+        Math.ceil(Math.max(0, finalCanvas.height - firstPageHeightPx) / subsequentPageHeightPx) + (finalCanvas.height > 0 ? 1 : 0)
+      );
+
+      // 8) compute sidebar width in canvas px
+      const leftEl = document.querySelector(".left");
+      let sidebarCssPx = leftEl ? leftEl.getBoundingClientRect().width : Math.round(0.32 * rootEl.getBoundingClientRect().width || 230);
+      const sidebarPx = Math.round(sidebarCssPx * DPR * widthScale);
+
+      // 9) create page images drawing the full-height sidebar color for each page
+      const pageImages = [];
+      const sidebarColor = getComputedStyle(document.documentElement).getPropertyValue("--sidebar-bg") || "#f8c6cc";
+      for (let p = 0; p < actualPages; p++) {
+        const sliceStartY = p === 0 ? 0 : firstPageHeightPx + (p - 1) * subsequentPageHeightPx;
+        const srcH = Math.min(p === 0 ? firstPageHeightPx : subsequentPageHeightPx, Math.max(0, finalCanvas.height - sliceStartY));
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = a4Wpx;
+        pageCanvas.height = a4Hpx;
+        const ctx = pageCanvas.getContext("2d");
+
+        // draw left stripe full height (so it appears on every page)
+        ctx.fillStyle = sidebarColor.trim();
+        ctx.fillRect(0, 0, sidebarPx, a4Hpx);
+        // draw white right background
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(sidebarPx, 0, a4Wpx - sidebarPx, a4Hpx);
+
+        const drawOffsetY = p === 0 ? 0 : topMarginPx;
+        const destW = a4Wpx;
+        const destH = Math.round(srcH * (destW / finalCanvas.width));
+        const destX = 0, destY = drawOffsetY;
+
+        if (srcH > 0 && destH > 0) {
+          ctx.drawImage(finalCanvas, 0, sliceStartY, finalCanvas.width, srcH, destX, destY, destW, destH);
+        }
+
+        pageImages.push(pageCanvas.toDataURL("image/jpeg", 1.0));
+      }
+
+      // 10) compose PDF via jsPDF (mm units)
+      const doc = new jsPDFClass({ unit: "mm", format: "a4", orientation: "portrait" });
+      for (let p = 0; p < pageImages.length; p++) {
+        if (p > 0) doc.addPage();
+        doc.addImage(pageImages[p], "JPEG", 0, 0, A4_W_MM, A4_H_MM, undefined, "NONE");
+      }
+
+      // 11) (optional) try to add anchor links mapping (best-effort)
+      try {
+        const anchors = Array.from(rootEl.querySelectorAll("a[href]")).map(a => {
+          const href = a.href;
+          const r = a.getBoundingClientRect();
+          const rr = rootEl.getBoundingClientRect();
+          return { href, leftCss: r.left - rr.left, topCss: r.top - rr.top, widthCss: r.width, heightCss: r.height };
+        });
+        const FIRST_PAGE_HEIGHT_MM = firstPageHeightPx / pxPerMm;
+        const SUBSEQ_PAGE_HEIGHT_MM = subsequentPageHeightPx / pxPerMm;
+        function cssPxToMm(cssPx) { return (cssPx * DPR * widthScale) / pxPerMm; }
+
+        anchors.forEach(a => {
+          if (!a.href) return;
+          const leftMm = cssPxToMm(a.leftCss);
+          const topMm = cssPxToMm(a.topCss);
+          const wMm = cssPxToMm(a.widthCss);
+          const hMm = cssPxToMm(a.heightCss);
+          function mmToPage(mmY) { if (mmY < FIRST_PAGE_HEIGHT_MM) return 0; return 1 + Math.floor((mmY - FIRST_PAGE_HEIGHT_MM) / SUBSEQ_PAGE_HEIGHT_MM); }
+          const startPage = mmToPage(topMm);
+          const endPage = mmToPage(topMm + hMm - 1e-6);
+          for (let page = startPage; page <= endPage; page++) {
+            if (page < 0 || page >= pageImages.length) continue;
+            const pageGlobalTopMm = page === 0 ? 0 : FIRST_PAGE_HEIGHT_MM + (page - 1) * SUBSEQ_PAGE_HEIGHT_MM;
+            const segTopGlobal = Math.max(topMm, pageGlobalTopMm);
+            const segBottomGlobal = Math.min(topMm + hMm, pageGlobalTopMm + SUBSEQ_PAGE_HEIGHT_MM);
+            const segHeightMm = segBottomGlobal - segTopGlobal;
+            if (segHeightMm <= 0) continue;
+            let localTopMm = page === 0 ? segTopGlobal : segTopGlobal - pageGlobalTopMm + TOP_MARGIN_MM;
+            const safeLeft = Math.max(0, leftMm);
+            const safeTop = Math.max(0, localTopMm);
+            const safeWidth = Math.max(0.1, wMm);
+            const safeHeight = Math.max(0.1, segHeightMm);
+            doc.setPage(page + 1);
+            doc.link(safeLeft, safeTop, safeWidth, safeHeight, { url: a.href });
+          }
+        });
+      } catch (e) {
+        console.warn("link mapping skipped:", e);
+      }
+
+      // 12) save PDF
+      doc.save("resume_template5.pdf");
+      console.log("PDF exported successfully.");
+    } catch (err) {
+      console.error("downloadPDF error:", err);
+      alert("PDF export failed — check console. Common causes: running page via file:// (use http), or blocked cross-origin images. See console for details.");
+    }
+  })();
+}
+
+
+
+function downloadTXT() {
+    let resumeText = document.querySelector(".resume-container").innerText;
+    const blob = new Blob([resumeText], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "resume_template5.txt";
+    link.click();
+}
+
+</script>
+
+</body>
+</html>
+
